@@ -29,8 +29,6 @@ class AvatarViewer extends StatelessWidget {
       minCameraOrbit: 'auto auto 1.5m',
       maxCameraOrbit: 'auto auto 5m',
       backgroundColor: backgroundColor,
-      animationName: 'idle',
-      autoPlay: true,
     );
   }
 }
