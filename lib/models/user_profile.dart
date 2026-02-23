@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum Gender { male, female }
 
 enum GoalType { muscleGain, weightLoss, maintenance }
@@ -104,4 +106,47 @@ class UserProfile {
     if (required == 0) return 1.0;
     return (currentXP / required).clamp(0.0, 1.0);
   }
+
+  Map<String, dynamic> toFirestore() => {
+        'gender': gender.name,
+        'height': height,
+        'weight': weight,
+        'targetWeight': targetWeight,
+        'goalType': goalType.name,
+        'targetDays': targetDays,
+        'currentLevel': currentLevel,
+        'currentXP': currentXP,
+        'totalXP': totalXP,
+        'protein': protein,
+        'bodyStage': bodyStage,
+        'bodyChangeFlag': bodyChangeFlag,
+        'createdAt': FieldValue.serverTimestamp(),
+        'lastLoginAt': FieldValue.serverTimestamp(),
+      };
+
+  factory UserProfile.fromFirestore(Map<String, dynamic> data) {
+    return UserProfile(
+      gender: Gender.values.byName(data['gender'] as String),
+      height: (data['height'] as num).toDouble(),
+      weight: (data['weight'] as num).toDouble(),
+      targetWeight: (data['targetWeight'] as num).toDouble(),
+      goalType: GoalType.values.byName(data['goalType'] as String),
+      targetDays: data['targetDays'] as int? ?? 30,
+      currentLevel: data['currentLevel'] as int? ?? 1,
+      currentXP: data['currentXP'] as int? ?? 0,
+      totalXP: data['totalXP'] as int? ?? 0,
+      protein: data['protein'] as int? ?? 0,
+      bodyStage: data['bodyStage'] as int? ?? 1,
+      bodyChangeFlag: data['bodyChangeFlag'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toFirestoreUpdate() => {
+        'currentLevel': currentLevel,
+        'currentXP': currentXP,
+        'totalXP': totalXP,
+        'protein': protein,
+        'bodyStage': bodyStage,
+        'bodyChangeFlag': bodyChangeFlag,
+      };
 }

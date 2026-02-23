@@ -12,6 +12,8 @@
 .swiftpm/
 migrate_working_dir/
 
+google-services.json
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -38,6 +40,8 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+.claude/
 
 # Android Studio will place build artifacts here
 /android/app/debug

@@ -3,141 +3,164 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/avatar_viewer.dart';
+import '../../widgets/level_up_overlay.dart';
 import '../mirror/mirror_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     if (profile == null) return const SizedBox.shrink();
 
+    final levelUpEvent = ref.watch(levelUpEventProvider);
+
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Top stats bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Level badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.secondary, Color(0xFF6BA3E8)],
+            Column(
+              children: [
+                // Top stats bar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Level badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.secondary, Color(0xFF6BA3E8)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.star,
+                                color: Colors.white, size: 18),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Lv.${profile.currentLevel}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.white, size: 18),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Lv.${profile.currentLevel}',
+                      // Body stage
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          profile.bodyStageLabel,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  // Body stage
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      profile.bodyStageLabel,
-                      style: const TextStyle(
-                        color: AppColors.accent,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // XP and Protein stats
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.bolt,
-                      iconColor: AppColors.xpGold,
-                      label: 'XP',
-                      value: '${profile.currentXP}',
-                      subValue: '/ ${profile.xpForNextLevel}',
-                      progress: profile.levelProgress,
-                      progressColor: AppColors.xpGold,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.local_dining,
-                      iconColor: AppColors.proteinGreen,
-                      label: 'Protein',
-                      value: '${profile.protein}',
-                      subValue: '',
-                      progress: null,
-                      progressColor: AppColors.proteinGreen,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 3D Avatar
-            const Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: AvatarViewer(),
-              ),
-            ),
-
-            // Action buttons
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: Column(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showExerciseDialog(context, ref),
-                    icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                    label: const Text('Start Exercise'),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const MirrorScreen(),
+                // XP and Protein stats
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          icon: Icons.bolt,
+                          iconColor: AppColors.xpGold,
+                          label: 'XP',
+                          value: '${profile.currentXP}',
+                          subValue: '/ ${profile.xpForNextLevel}',
+                          progress: profile.levelProgress,
+                          progressColor: AppColors.xpGold,
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.person_search, size: 24),
-                    label: const Text('Look in the Mirror'),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatCard(
+                          icon: Icons.local_dining,
+                          iconColor: AppColors.proteinGreen,
+                          label: 'Protein',
+                          value: '${profile.protein}',
+                          subValue: '',
+                          progress: null,
+                          progressColor: AppColors.proteinGreen,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                // 3D Avatar - full body display with interaction
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: AvatarViewer(),
+                  ),
+                ),
+
+                // Action buttons
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  child: Column(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _showExerciseDialog(context, ref),
+                        icon:
+                            const Icon(Icons.play_arrow_rounded, size: 28),
+                        label: const Text('Start Exercise'),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const MirrorScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.person_search, size: 24),
+                        label: const Text('Look in the Mirror'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+
+            // Level-up overlay
+            if (levelUpEvent != null)
+              LevelUpOverlay(
+                newLevel: levelUpEvent,
+                onDismiss: () {
+                  ref.read(levelUpEventProvider.notifier).clear();
+                },
+              ),
           ],
         ),
       ),
@@ -277,16 +300,22 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
     });
   }
 
-  void _endExercise() {
+  Future<void> _endExercise() async {
     final minutes = (_elapsedSeconds / 60).ceil().clamp(1, 999);
-    widget.ref.read(userProfileProvider.notifier).addWorkoutRewards(
+    final startTime = _startTime!;
+    final endTime = DateTime.now();
+
+    await widget.ref.read(userProfileProvider.notifier).addWorkoutRewards(
           minutes: minutes,
+          startTime: startTime,
+          endTime: endTime,
         );
     setState(() => _isExercising = false);
 
     final earnedXP = minutes * 10;
     final earnedProtein = minutes * 5;
 
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

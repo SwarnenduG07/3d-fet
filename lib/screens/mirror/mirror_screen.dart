@@ -129,14 +129,18 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   ),
                 ),
 
-                // 3D Avatar - full body mirror view
-                const Expanded(
+                // 3D Avatar - full body mirror view, no auto-rotate
+                Expanded(
                   child: Padding(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     child: AvatarViewer(
-                      backgroundColor: Color(0xFF1A1A2E),
+                      backgroundColor: const Color(0xFF1A1A2E),
                       autoRotate: false,
-                      cameraOrbit: '0deg 85deg 2.2m',
+                      cameraOrbit: '0deg 85deg 3.2m',
+                      cameraTarget: '0m 0.85m 0m',
+                      fieldOfView: '36deg',
+                      interactionPrompt: false,
+                      enableIdleAnimation: true,
                     ),
                   ),
                 ),

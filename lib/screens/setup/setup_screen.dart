@@ -43,8 +43,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     }
   }
 
-  void _completeSetup() {
-    ref.read(userProfileProvider.notifier).createProfile(
+  Future<void> _completeSetup() async {
+    await ref.read(userProfileProvider.notifier).createProfile(
           gender: _gender,
           height: double.tryParse(_heightController.text) ?? 170,
           weight: double.tryParse(_weightController.text) ?? 70,
@@ -52,6 +52,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           goalType: _goalType,
           targetDays: _targetDays,
         );
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
     );
