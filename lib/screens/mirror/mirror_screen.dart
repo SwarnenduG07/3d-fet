@@ -140,7 +140,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                       cameraTarget: '0m 0.85m 0m',
                       fieldOfView: '36deg',
                       interactionPrompt: false,
-                      enableIdleAnimation: true,
+                      enableIdleAnimation: false,
                     ),
                   ),
                 ),

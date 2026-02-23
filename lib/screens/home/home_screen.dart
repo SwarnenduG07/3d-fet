@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/user_profile.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/avatar_viewer.dart';
@@ -59,6 +60,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                      // Debug button
+                      GestureDetector(
+                        onTap: () => _showDebugDialog(context, ref),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.bug_report, size: 16, color: Colors.grey),
                         ),
                       ),
                       // Body stage
@@ -164,6 +178,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showDebugDialog(BuildContext context, WidgetRef ref) {
+    final profile = ref.read(userProfileProvider);
+    if (profile == null) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => _DebugTestDialog(ref: ref, profile: profile),
     );
   }
 
@@ -441,6 +464,165 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _DebugTestDialog extends StatefulWidget {
+  final WidgetRef ref;
+  final UserProfile profile;
+
+  const _DebugTestDialog({required this.ref, required this.profile});
+
+  @override
+  State<_DebugTestDialog> createState() => _DebugTestDialogState();
+}
+
+class _DebugTestDialogState extends State<_DebugTestDialog> {
+  late double _level;
+  late double _xp;
+  late double _protein;
+  late double _bodyStage;
+
+  @override
+  void initState() {
+    super.initState();
+    _level = widget.profile.currentLevel.toDouble();
+    _xp = widget.profile.currentXP.toDouble();
+    _protein = widget.profile.protein.toDouble();
+    _bodyStage = widget.profile.bodyStage.toDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Row(
+        children: [
+          Icon(Icons.bug_report, color: AppColors.accentOrange),
+          SizedBox(width: 8),
+          Text('Debug Test Panel'),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _SliderRow(
+              label: 'Level',
+              value: _level,
+              min: 1,
+              max: 50,
+              divisions: 49,
+              display: _level.round().toString(),
+              onChanged: (v) => setState(() => _level = v),
+            ),
+            _SliderRow(
+              label: 'XP',
+              value: _xp,
+              min: 0,
+              max: 150000,
+              divisions: 300,
+              display: _xp.round().toString(),
+              onChanged: (v) => setState(() => _xp = v),
+            ),
+            _SliderRow(
+              label: 'Protein',
+              value: _protein,
+              min: 0,
+              max: 50000,
+              divisions: 100,
+              display: _protein.round().toString(),
+              onChanged: (v) => setState(() => _protein = v),
+            ),
+            _SliderRow(
+              label: 'Body Stage',
+              value: _bodyStage,
+              min: 1,
+              max: 5,
+              divisions: 4,
+              display: '${_bodyStage.round()} - ${_stageLabel(_bodyStage.round())}',
+              onChanged: (v) => setState(() => _bodyStage = v),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await widget.ref.read(userProfileProvider.notifier).setTestValues(
+                  level: _level.round(),
+                  xp: _xp.round(),
+                  protein: _protein.round(),
+                  bodyStage: _bodyStage.round(),
+                );
+            if (!context.mounted) return;
+            Navigator.of(context).pop();
+          },
+          child: const Text('Apply'),
+        ),
+      ],
+    );
+  }
+
+  String _stageLabel(int stage) {
+    switch (stage) {
+      case 1: return 'Slim';
+      case 2: return 'Toned';
+      case 3: return 'Muscular';
+      case 4: return 'Athletic';
+      case 5: return 'Ideal';
+      default: return '';
+    }
+  }
+}
+
+class _SliderRow extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final int divisions;
+  final String display;
+  final ValueChanged<double> onChanged;
+
+  const _SliderRow({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.display,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              Text(display, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.secondary)),
+            ],
+          ),
+          Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -123,6 +123,30 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     }
   }
 
+  Future<void> setTestValues({
+    required int level,
+    required int xp,
+    required int protein,
+    required int bodyStage,
+  }) async {
+    if (state == null) return;
+    final previousLevel = state!.currentLevel;
+    final previousStage = state!.bodyStage;
+    state = state!.copyWith(
+      currentLevel: level,
+      currentXP: xp,
+      protein: protein,
+      bodyStage: bodyStage,
+      bodyChangeFlag: bodyStage != previousStage,
+    );
+    if (level > previousLevel) {
+      ref.read(levelUpEventProvider.notifier).trigger(level);
+    }
+    if (_uid != null) {
+      await _firestore.updateUserProfile(_uid!, state!.toFirestoreUpdate());
+    }
+  }
+
   void clearBodyChangeFlag() {
     if (state == null) return;
     state = state!.copyWith(bodyChangeFlag: false);

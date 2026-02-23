@@ -21,7 +21,7 @@ class AvatarViewer extends StatefulWidget {
     this.cameraTarget,
     this.fieldOfView,
     this.interactionPrompt = true,
-    this.enableIdleAnimation = true,
+    this.enableIdleAnimation = false,
   });
 
   @override
