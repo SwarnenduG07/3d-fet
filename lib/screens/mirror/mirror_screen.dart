@@ -134,6 +134,8 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: AvatarViewer(
+                      key: ValueKey(profile.avatarModelPath),
+                      modelAsset: profile.avatarModelPath,
                       backgroundColor: const Color(0xFF1A1A2E),
                       autoRotate: false,
                       cameraOrbit: '0deg 85deg 3.2m',

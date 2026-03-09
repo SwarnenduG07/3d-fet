@@ -63,6 +63,22 @@ class UserProfile {
     );
   }
 
+  /// Calculates the starting body stage from height (cm) and weight (kg)
+  /// using BMI. Higher BMI = fatter = lower stage (xl model).
+  static int initialBodyStage(double heightCm, double weightKg) {
+    final heightM = heightCm / 100.0;
+    final bmi = weightKg / (heightM * heightM);
+    // BMI >= 30  → Stage 1 (xl, fattest)
+    // BMI 25–30  → Stage 2 (x)
+    // BMI 22–25  → Stage 3 (sx, fit)
+    // BMI 18.5–22 → Stage 4 (sm, lean)
+    // BMI < 18.5  → Stage 4 (sm, lean)
+    if (bmi >= 30) return 1;
+    if (bmi >= 25) return 2;
+    if (bmi >= 22) return 3;
+    return 4;
+  }
+
   String get bodyStageLabel {
     switch (bodyStage) {
       case 1:
@@ -78,6 +94,28 @@ class UserProfile {
       default:
         return 'Slim';
     }
+  }
+
+  /// Returns the GLB model asset path based on gender and current body stage.
+  /// xl = fattest (start), x = less fat, sx = fit, sm = ideal (goal).
+  String get avatarModelPath {
+    final folder = gender == Gender.male ? 'male' : 'female';
+    final suffix = gender == Gender.male ? 'm' : 'fm';
+    final String size;
+    switch (bodyStage) {
+      case 1:
+        size = 'xl';
+      case 2:
+        size = 'x';
+      case 3:
+        size = 'sx';
+      case 4:
+      case 5:
+        size = 'sm';
+      default:
+        size = 'xl';
+    }
+    return 'assets/models/$folder/${size}_$suffix.glb';
   }
 
   String get goalTypeLabel {

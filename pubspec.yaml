@@ -26,3 +26,5 @@ flutter:
 
   assets:
     - assets/models/
+    - assets/models/male/
+    - assets/models/female/

@@ -134,7 +134,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: AvatarViewer(),
+                    child: AvatarViewer(
+                      key: ValueKey(profile.avatarModelPath),
+                      modelAsset: profile.avatarModelPath,
+                    ),
                   ),
                 ),
 

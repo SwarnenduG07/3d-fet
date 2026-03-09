@@ -49,6 +49,7 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     required GoalType goalType,
     required int targetDays,
   }) async {
+    final initialStage = UserProfile.initialBodyStage(height, weight);
     final profile = UserProfile(
       gender: gender,
       height: height,
@@ -56,6 +57,7 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
       targetWeight: targetWeight,
       goalType: goalType,
       targetDays: targetDays,
+      bodyStage: initialStage,
     );
     state = profile;
     if (_uid != null) {
