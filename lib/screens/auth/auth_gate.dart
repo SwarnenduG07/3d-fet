@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../setup/setup_screen.dart';
-import '../home/home_screen.dart';
+import '../navigation/main_navigation_screen.dart';
 
 class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
@@ -46,6 +46,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     if (profile == null) {
       return const SetupScreen();
     }
-    return const HomeScreen();
+    return const MainNavigationScreen();
   }
 }

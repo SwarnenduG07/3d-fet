@@ -96,14 +96,24 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                 // Body stage info with exclamation mark
                 Container(
                   margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    gradient: LinearGradient(
+                      colors: profile.bodyChangeFlag
+                          ? [
+                              AppColors.xpGold.withValues(alpha: 0.15),
+                              AppColors.xpGold.withValues(alpha: 0.05),
+                            ]
+                          : [
+                              Colors.white.withValues(alpha: 0.1),
+                              Colors.white.withValues(alpha: 0.05),
+                            ],
+                    ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: profile.bodyChangeFlag
                           ? AppColors.xpGold
-                          : Colors.white.withValues(alpha: 0.12),
+                          : Colors.white.withValues(alpha: 0.15),
                       width: profile.bodyChangeFlag ? 2 : 1,
                     ),
                   ),
@@ -117,10 +127,17 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                           builder: (context, scale, child) {
                             return Transform.scale(
                               scale: scale,
-                              child: const Icon(
-                                Icons.error_outline,
-                                color: AppColors.xpGold,
-                                size: 32,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.xpGold.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.auto_awesome,
+                                  color: AppColors.xpGold,
+                                  size: 28,
+                                ),
                               ),
                             );
                           },
