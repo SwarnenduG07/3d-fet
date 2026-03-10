@@ -15,6 +15,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
   bool _showTransformation = false;
 
   @override
@@ -22,11 +23,14 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1200),
     );
     _fadeAnimation = CurvedAnimation(
       parent: _animController,
       curve: Curves.easeIn,
+    );
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
     );
 
     final profile = ref.read(userProfileProvider);
@@ -89,7 +93,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   ),
                 ),
 
-                // Body stage info
+                // Body stage info with exclamation mark
                 Container(
                   margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                   padding: const EdgeInsets.all(16),
@@ -97,12 +101,33 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                     color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: profile.bodyChangeFlag
+                          ? AppColors.xpGold
+                          : Colors.white.withValues(alpha: 0.12),
+                      width: profile.bodyChangeFlag ? 2 : 1,
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      if (profile.bodyChangeFlag)
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.8, end: 1.2),
+                          duration: const Duration(milliseconds: 600),
+                          builder: (context, scale, child) {
+                            return Transform.scale(
+                              scale: scale,
+                              child: const Icon(
+                                Icons.error_outline,
+                                color: AppColors.xpGold,
+                                size: 32,
+                              ),
+                            );
+                          },
+                          onEnd: () {
+                            setState(() {});
+                          },
+                        ),
                       _MirrorStat(
                         label: 'Stage',
                         value: profile.bodyStageLabel,
@@ -129,7 +154,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   ),
                 ),
 
-                // 3D Avatar - full body mirror view, no auto-rotate
+                // 3D Avatar - full body mirror view
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8),
@@ -188,7 +213,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _stageLabel(stage),
+                                'Stage $stage',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: isActive
@@ -206,49 +231,82 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
               ],
             ),
 
-            // Transformation overlay
+            // Transformation overlay with joy expression
             if (_showTransformation)
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: GestureDetector(
                   onTap: _dismissTransformation,
                   child: Container(
-                    color: Colors.black.withValues(alpha: 0.7),
+                    color: Colors.black.withValues(alpha: 0.85),
                     child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome,
-                            size: 64,
-                            color: AppColors.xpGold,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Body Transformation!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Joy expression - sparkles and celebration
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 800),
+                              builder: (context, value, child) {
+                                return Transform.rotate(
+                                  angle: value * 0.5,
+                                  child: const Icon(
+                                    Icons.auto_awesome,
+                                    size: 80,
+                                    color: AppColors.xpGold,
+                                  ),
+                                );
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'You\'ve reached Stage ${profile.bodyStage}: ${profile.bodyStageLabel}!',
-                            style: const TextStyle(
-                              color: AppColors.xpGold,
-                              fontSize: 18,
+                            const SizedBox(height: 24),
+                            const Text(
+                              '🎉',
+                              style: TextStyle(fontSize: 64),
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          const Text(
-                            'Tap to continue',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 14,
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Body Transformation!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.xpGold.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.xpGold,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Text(
+                                'You\'ve reached ${profile.bodyStageLabel}!',
+                                style: const TextStyle(
+                                  color: AppColors.xpGold,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            const Text(
+                              'Tap to continue',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -258,23 +316,6 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
         ),
       ),
     );
-  }
-
-  String _stageLabel(int stage) {
-    switch (stage) {
-      case 1:
-        return 'Slim';
-      case 2:
-        return 'Toned';
-      case 3:
-        return 'Muscular';
-      case 4:
-        return 'Athletic';
-      case 5:
-        return 'Ideal';
-      default:
-        return '';
-    }
   }
 }
 

@@ -15,7 +15,7 @@ class AvatarViewer extends StatefulWidget {
   const AvatarViewer({
     super.key,
     this.modelAsset = 'assets/models/avatar_default.glb',
-    this.backgroundColor = const Color(0xFFF5F7FA),
+    this.backgroundColor = const Color(0xFFFFFBF5),
     this.autoRotate = true,
     this.cameraOrbit,
     this.cameraTarget,

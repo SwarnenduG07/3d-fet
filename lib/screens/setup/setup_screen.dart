@@ -61,58 +61,72 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            // Progress indicator
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Row(
-                children: List.generate(4, (index) {
-                  return Expanded(
-                    child: Container(
-                      height: 4,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: index <= _currentPage
-                            ? AppColors.secondary
-                            : AppColors.divider,
-                        borderRadius: BorderRadius.circular(2),
+      backgroundColor: AppColors.background,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.softPink.withValues(alpha: 0.3),
+              AppColors.softBlue.withValues(alpha: 0.3),
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              // Progress indicator
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Row(
+                  children: List.generate(4, (index) {
+                    return Expanded(
+                      child: Container(
+                        height: 4,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: index <= _currentPage
+                              ? AppColors.secondary
+                              : AppColors.divider,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Pages
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (page) {
-                  setState(() => _currentPage = page);
-                },
-                children: [
-                  _buildGenderPage(),
-                  _buildBodyMeasurementsPage(),
-                  _buildGoalPage(),
-                  _buildTimeframePage(),
-                ],
-              ),
-            ),
-            // Next button
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: ElevatedButton(
-                onPressed: _nextPage,
-                child: Text(
-                  _currentPage < 3 ? 'Next' : 'Start Your Journey',
+                    );
+                  }),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              // Pages
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (page) {
+                    setState(() => _currentPage = page);
+                  },
+                  children: [
+                    _buildGenderPage(),
+                    _buildBodyMeasurementsPage(),
+                    _buildGoalPage(),
+                    _buildTimeframePage(),
+                  ],
+                ),
+              ),
+              // Next button
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: ElevatedButton(
+                  onPressed: _nextPage,
+                  child: Text(
+                    _currentPage < 3 ? 'Next' : 'Start Your Journey',
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

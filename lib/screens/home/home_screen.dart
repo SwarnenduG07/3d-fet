@@ -23,163 +23,307 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final levelUpEvent = ref.watch(levelUpEventProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                // Top stats bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Level badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppColors.secondary, Color(0xFF6BA3E8)],
+      backgroundColor: AppColors.background,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.softBlue.withValues(alpha: 0.3),
+              AppColors.softPink.withValues(alpha: 0.2),
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  // Top stats bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Level badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.star,
-                                color: Colors.white, size: 18),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Lv.${profile.currentLevel}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Debug button
-                      GestureDetector(
-                        onTap: () => _showDebugDialog(context, ref),
-                        child: Container(
-                          width: 32,
-                          height: 32,
                           decoration: BoxDecoration(
-                            color: Colors.grey.withValues(alpha: 0.3),
-                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [AppColors.secondary, AppColors.secondary.withValues(alpha: 0.7)],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.secondary.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.bug_report, size: 16, color: Colors.grey),
-                        ),
-                      ),
-                      // Body stage
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          profile.bodyStageLabel,
-                          style: const TextStyle(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.star,
+                                  color: Colors.white, size: 18),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Lv.${profile.currentLevel}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // XP and Protein stats
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.bolt,
-                          iconColor: AppColors.xpGold,
-                          label: 'XP',
-                          value: '${profile.currentXP}',
-                          subValue: '/ ${profile.xpForNextLevel}',
-                          progress: profile.levelProgress,
-                          progressColor: AppColors.xpGold,
+                        // Settings button
+                        GestureDetector(
+                          onTap: () => _showSettingsMenu(context, ref),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.settings, size: 20, color: AppColors.textSecondary),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.local_dining,
-                          iconColor: AppColors.proteinGreen,
-                          label: 'Protein',
-                          value: '${profile.protein}',
-                          subValue: '',
-                          progress: null,
-                          progressColor: AppColors.proteinGreen,
+                        // Body stage
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColors.accent.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            profile.bodyStageLabel,
+                            style: const TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 3D Avatar - full body display with interaction
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: AvatarViewer(
-                      key: ValueKey(profile.avatarModelPath),
-                      modelAsset: profile.avatarModelPath,
+                      ],
                     ),
                   ),
-                ),
 
-                // Action buttons
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  child: Column(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => _showExerciseDialog(context, ref),
-                        icon:
-                            const Icon(Icons.play_arrow_rounded, size: 28),
-                        label: const Text('Start Exercise'),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const MirrorScreen(),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.person_search, size: 24),
-                        label: const Text('Look in the Mirror'),
-                      ),
-                    ],
+                  // XP and Protein stats
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            icon: Icons.bolt,
+                            iconColor: AppColors.xpGold,
+                            label: 'XP',
+                            value: '${profile.currentXP}',
+                            subValue: '/ ${profile.xpForNextLevel}',
+                            progress: profile.levelProgress,
+                            progressColor: AppColors.xpGold,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            icon: Icons.local_dining,
+                            iconColor: AppColors.proteinGreen,
+                            label: 'Protein',
+                            value: '${profile.protein}',
+                            subValue: '',
+                            progress: null,
+                            progressColor: AppColors.proteinGreen,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
 
-            // Level-up overlay
-            if (levelUpEvent != null)
-              LevelUpOverlay(
-                newLevel: levelUpEvent,
-                onDismiss: () {
-                  ref.read(levelUpEventProvider.notifier).clear();
-                },
+                  // 3D Avatar - full body display with interaction
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: AvatarViewer(
+                        key: ValueKey(profile.avatarModelPath),
+                        modelAsset: profile.avatarModelPath,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                  ),
+
+                  // Action buttons
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    child: Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _showExerciseDialog(context, ref),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 4,
+                            shadowColor: AppColors.secondary.withValues(alpha: 0.4),
+                          ),
+                          icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                          label: const Text('Start Exercise', style: TextStyle(fontSize: 18)),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const MirrorScreen(),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            side: const BorderSide(color: AppColors.secondary, width: 2),
+                          ),
+                          icon: const Icon(Icons.person_search, size: 24),
+                          label: const Text('Look in the Mirror', style: TextStyle(fontSize: 18)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+
+              // Level-up overlay
+              if (levelUpEvent != null)
+                LevelUpOverlay(
+                  newLevel: levelUpEvent,
+                  onDismiss: () {
+                    ref.read(levelUpEventProvider.notifier).clear();
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSettingsMenu(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.divider,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.bug_report, color: AppColors.textSecondary),
+              title: const Text('Debug Test Panel'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showDebugDialog(context, ref);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.refresh, color: AppColors.accentOrange),
+              title: const Text('Reset Progress'),
+              subtitle: const Text('Start from level 1'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showResetConfirmation(context, ref);
+              },
+            ),
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showResetConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
+            SizedBox(width: 8),
+            Text('Reset Progress?'),
+          ],
+        ),
+        content: const Text(
+          'This will reset your level, XP, and protein to the beginning. This action cannot be undone.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await ref.read(userProfileProvider.notifier).resetProfile();
+              if (!context.mounted) return;
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Progress reset successfully'),
+                  backgroundColor: AppColors.accent,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentOrange,
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
       ),
     );
   }
@@ -226,13 +370,13 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -547,6 +691,19 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
               display: '${_bodyStage.round()} - ${_stageLabel(_bodyStage.round())}',
               onChanged: (v) => setState(() => _bodyStage = v),
             ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.softBlue.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Body transformations occur at levels:\n10, 20, 30, 40',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ),
@@ -573,14 +730,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
   }
 
   String _stageLabel(int stage) {
-    switch (stage) {
-      case 1: return 'Slim';
-      case 2: return 'Toned';
-      case 3: return 'Muscular';
-      case 4: return 'Athletic';
-      case 5: return 'Ideal';
-      default: return '';
-    }
+    return 'Stage $stage';
   }
 }
 

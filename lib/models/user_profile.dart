@@ -82,17 +82,17 @@ class UserProfile {
   String get bodyStageLabel {
     switch (bodyStage) {
       case 1:
-        return 'Slim';
+        return 'Stage 1';
       case 2:
-        return 'Toned';
+        return 'Stage 2';
       case 3:
-        return 'Muscular';
+        return 'Stage 3';
       case 4:
-        return 'Athletic';
+        return 'Stage 4';
       case 5:
-        return 'Ideal Form';
+        return 'Stage 5';
       default:
-        return 'Slim';
+        return 'Stage 1';
     }
   }
 
