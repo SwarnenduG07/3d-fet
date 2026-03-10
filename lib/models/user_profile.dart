@@ -64,14 +64,14 @@ class UserProfile {
   }
 
   /// Calculates the starting body stage from height (cm) and weight (kg)
-  /// using BMI. Higher BMI = fatter = lower stage (xl model).
+  /// using BMI. Higher BMI = fatter = lower stage number.
   static int initialBodyStage(double heightCm, double weightKg) {
     final heightM = heightCm / 100.0;
     final bmi = weightKg / (heightM * heightM);
-    // BMI >= 30  → Stage 1 (xl, fattest)
-    // BMI 25–30  → Stage 2 (x)
-    // BMI 22–25  → Stage 3 (sx, fit)
-    // BMI 18.5–22 → Stage 4 (sm, lean)
+    // BMI >= 30  → Stage 1 (xl, fattest - needs most improvement)
+    // BMI 25–30  → Stage 2 (x, overweight)
+    // BMI 22–25  → Stage 3 (sx, normal)
+    // BMI 18.5–22 → Stage 4 (sm, fit - already good shape)
     // BMI < 18.5  → Stage 4 (sm, lean)
     if (bmi >= 30) return 1;
     if (bmi >= 25) return 2;

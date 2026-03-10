@@ -37,13 +37,10 @@ class FirestoreService {
   }
 
   Future<List<WorkoutRecord>> getWorkouts(String uid, {int limit = 50}) async {
-    final query = _workoutsCol
-        .where('userId', isEqualTo: uid)
-        .orderBy('createdAt', descending: true)
-        .limit(limit);
+    final query = _workoutsCol.where('userId', isEqualTo: uid).limit(limit);
     final snap = await query.get();
-    return snap.docs
-        .map((doc) => WorkoutRecord.fromFirestore(doc.data()))
-        .toList();
+    final workouts = snap.docs.map((doc) => WorkoutRecord.fromFirestore(doc.data())).toList();
+    workouts.sort((a, b) => b.startTime.compareTo(a.startTime));
+    return workouts;
   }
 }

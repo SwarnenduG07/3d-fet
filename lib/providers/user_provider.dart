@@ -92,9 +92,12 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     }
 
     final newStage = _bodyStageForLevel(newLevel);
-    if (newStage != state!.bodyStage) {
+    // Body stage should only increase, never decrease (you don't get fatter from exercise!)
+    if (newStage > state!.bodyStage) {
       newBodyStage = newStage;
       bodyChangeFlag = true;
+    } else {
+      newBodyStage = state!.bodyStage; // Keep current stage if it's already higher
     }
 
     state = state!.copyWith(
@@ -121,7 +124,9 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
         earnedXP: earnedXP,
         earnedProtein: earnedProtein,
       );
+      print('💾 Saving workout: ${workout.duration} min, ${workout.earnedXP} XP');
       await _firestore.saveWorkout(workout);
+      print('✅ Workout saved successfully');
     }
   }
 
