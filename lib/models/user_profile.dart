@@ -121,11 +121,11 @@ class UserProfile {
   String get goalTypeLabel {
     switch (goalType) {
       case GoalType.muscleGain:
-        return 'Muscle Gain';
+        return '筋肉増強';
       case GoalType.weightLoss:
-        return 'Weight Loss';
+        return '減量';
       case GoalType.maintenance:
-        return 'Maintenance';
+        return '維持';
     }
   }
 

@@ -121,7 +121,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 child: ElevatedButton(
                   onPressed: _nextPage,
                   child: Text(
-                    _currentPage < 3 ? 'Next' : 'Start Your Journey',
+                    _currentPage < 3 ? '次へ' : '始める',
                   ),
                 ),
               ),
@@ -139,7 +139,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Welcome to GrowMe!',
+            'GrowMeへようこそ！',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -148,7 +148,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Select your gender',
+            '性別を選択してください',
             style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -160,7 +160,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               Expanded(
                 child: _GenderCard(
                   icon: Icons.male,
-                  label: 'Male',
+                  label: '男性',
                   isSelected: _gender == Gender.male,
                   onTap: () => setState(() => _gender = Gender.male),
                 ),
@@ -169,7 +169,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               Expanded(
                 child: _GenderCard(
                   icon: Icons.female,
-                  label: 'Female',
+                  label: '女性',
                   isSelected: _gender == Gender.female,
                   onTap: () => setState(() => _gender = Gender.female),
                 ),
@@ -188,7 +188,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Your Body',
+            'あなたの体',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Enter your measurements',
+            '体の情報を入力してください',
             style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -206,19 +206,19 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           const SizedBox(height: 48),
           _buildTextField(
             controller: _heightController,
-            label: 'Height (cm)',
+            label: '身長 (cm)',
             icon: Icons.height,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _weightController,
-            label: 'Current Weight (kg)',
+            label: '現在の体重 (kg)',
             icon: Icons.monitor_weight_outlined,
           ),
           const SizedBox(height: 16),
           _buildTextField(
             controller: _targetWeightController,
-            label: 'Target Weight (kg)',
+            label: '目標体重 (kg)',
             icon: Icons.flag_outlined,
           ),
         ],
@@ -233,7 +233,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Your Goal',
+            'あなたの目標',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -242,7 +242,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'What do you want to achieve?',
+            '何を達成したいですか？',
             style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -251,24 +251,24 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           const SizedBox(height: 48),
           _GoalCard(
             icon: Icons.fitness_center,
-            label: 'Muscle Gain',
-            description: 'Build strength and muscle mass',
+            label: '筋肉増強',
+            description: '筋力と筋肉量を増やす',
             isSelected: _goalType == GoalType.muscleGain,
             onTap: () => setState(() => _goalType = GoalType.muscleGain),
           ),
           const SizedBox(height: 12),
           _GoalCard(
             icon: Icons.local_fire_department,
-            label: 'Weight Loss',
-            description: 'Burn fat and get lean',
+            label: '減量',
+            description: '脂肪を燃焼して引き締める',
             isSelected: _goalType == GoalType.weightLoss,
             onTap: () => setState(() => _goalType = GoalType.weightLoss),
           ),
           const SizedBox(height: 12),
           _GoalCard(
             icon: Icons.balance,
-            label: 'Maintenance',
-            description: 'Stay healthy and active',
+            label: '維持',
+            description: '健康的で活動的な状態を保つ',
             isSelected: _goalType == GoalType.maintenance,
             onTap: () => setState(() => _goalType = GoalType.maintenance),
           ),
@@ -284,7 +284,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Timeframe',
+            '期間',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -293,7 +293,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Set your target period',
+            '目標期間を設定してください',
             style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -304,19 +304,19 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _TimeframeChip(
-                label: '30 Days',
+                label: '30日',
                 isSelected: _targetDays == 30,
                 onTap: () => setState(() => _targetDays = 30),
               ),
               const SizedBox(width: 12),
               _TimeframeChip(
-                label: '60 Days',
+                label: '60日',
                 isSelected: _targetDays == 60,
                 onTap: () => setState(() => _targetDays = 60),
               ),
               const SizedBox(width: 12),
               _TimeframeChip(
-                label: '90 Days',
+                label: '90日',
                 isSelected: _targetDays == 90,
                 onTap: () => setState(() => _targetDays = 90),
               ),
@@ -338,7 +338,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '$_targetDays Days Challenge',
+                  '$_targetDays日チャレンジ',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -347,7 +347,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Your avatar will grow with you!',
+                  'あなたのアバターが一緒に成長します！',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,

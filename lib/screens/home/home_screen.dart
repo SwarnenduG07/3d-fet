@@ -189,7 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             shadowColor: AppColors.secondary.withValues(alpha: 0.4),
                           ),
                           icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                          label: const Text('Start Exercise', style: TextStyle(fontSize: 18)),
+                          label: const Text('トレーニング開始', style: TextStyle(fontSize: 18)),
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
@@ -208,7 +208,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             side: const BorderSide(color: AppColors.secondary, width: 2),
                           ),
                           icon: const Icon(Icons.person_search, size: 24),
-                          label: const Text('Look in the Mirror', style: TextStyle(fontSize: 18)),
+                          label: const Text('鏡を見る', style: TextStyle(fontSize: 18)),
                         ),
                       ],
                     ),
@@ -253,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'Settings',
+              '設定',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -263,7 +263,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.bug_report, color: AppColors.textSecondary),
-              title: const Text('Debug Test Panel'),
+              title: const Text('デバッグテストパネル'),
               onTap: () {
                 Navigator.pop(ctx);
                 _showDebugDialog(context, ref);
@@ -271,8 +271,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.refresh, color: AppColors.accentOrange),
-              title: const Text('Reset Progress'),
-              subtitle: const Text('Start from level 1'),
+              title: const Text('進捗をリセット'),
+              subtitle: const Text('レベル1から再スタート'),
               onTap: () {
                 Navigator.pop(ctx);
                 _showResetConfirmation(context, ref);
@@ -294,17 +294,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
             SizedBox(width: 8),
-            Text('Reset Progress?'),
+            Text('進捗をリセットしますか？'),
           ],
         ),
         content: const Text(
-          'This will reset your level, XP, and protein to the beginning. This action cannot be undone.',
+          'レベル、XP、プロテインが初期状態に戻ります。この操作は取り消せません。',
           style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('キャンセル'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -313,7 +313,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Progress reset successfully'),
+                  content: Text('進捗をリセットしました'),
                   backgroundColor: AppColors.accent,
                 ),
               );
@@ -321,7 +321,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accentOrange,
             ),
-            child: const Text('Reset'),
+            child: const Text('リセット'),
           ),
         ],
       ),
@@ -494,13 +494,13 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
           children: [
             Icon(Icons.celebration, color: AppColors.accentOrange),
             SizedBox(width: 8),
-            Text('Workout Complete!'),
+            Text('トレーニング完了！'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Duration: $minutes min'),
+            Text('時間: $minutes 分'),
             const SizedBox(height: 8),
             Text(
               '+$earnedXP XP',
@@ -511,7 +511,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               ),
             ),
             Text(
-              '+$earnedProtein Protein',
+              '+$earnedProtein プロテイン',
               style: const TextStyle(
                 color: AppColors.proteinGreen,
                 fontWeight: FontWeight.bold,
@@ -526,7 +526,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               Navigator.of(ctx).pop();
               Navigator.of(context).pop();
             },
-            child: const Text('Awesome!'),
+            child: const Text('素晴らしい！'),
           ),
         ],
       ),
@@ -544,7 +544,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(
-        _isExercising ? 'Exercising...' : 'Ready to Exercise?',
+        _isExercising ? 'トレーニング中...' : 'トレーニング準備完了',
         textAlign: TextAlign.center,
       ),
       content: Column(
@@ -568,7 +568,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Keep going! Every second counts.',
+              '頑張って！1秒1秒が大切です。',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ] else ...[
@@ -579,8 +579,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Tap start when you begin your workout. '
-              'You\'ll earn XP and Protein!',
+              'トレーニングを開始したらスタートをタップしてください。XPとプロテインを獲得できます！',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textSecondary),
             ),
@@ -591,14 +590,14 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
         if (!_isExercising) ...[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('キャンセル'),
           ),
           ElevatedButton(
             onPressed: _startExercise,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(120, 44),
             ),
-            child: const Text('Start'),
+            child: const Text('スタート'),
           ),
         ] else ...[
           ElevatedButton(
@@ -607,7 +606,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               backgroundColor: AppColors.accentOrange,
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text('End Exercise'),
+            child: const Text('トレーニング終了'),
           ),
         ],
       ],
@@ -648,7 +647,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
         children: [
           Icon(Icons.bug_report, color: AppColors.accentOrange),
           SizedBox(width: 8),
-          Text('Debug Test Panel'),
+          Text('デバッグテストパネル'),
         ],
       ),
       content: SingleChildScrollView(
@@ -656,7 +655,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _SliderRow(
-              label: 'Level',
+              label: 'レベル',
               value: _level,
               min: 1,
               max: 50,
@@ -674,7 +673,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
               onChanged: (v) => setState(() => _xp = v),
             ),
             _SliderRow(
-              label: 'Protein',
+              label: 'プロテイン',
               value: _protein,
               min: 0,
               max: 50000,
@@ -683,7 +682,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
               onChanged: (v) => setState(() => _protein = v),
             ),
             _SliderRow(
-              label: 'Body Stage',
+              label: '体のステージ',
               value: _bodyStage,
               min: 1,
               max: 5,
@@ -699,7 +698,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
-                'Body transformations occur at levels:\n10, 20, 30, 40',
+                '体の変化はレベル10、20、30、40で発生します',
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
@@ -710,7 +709,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('キャンセル'),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -723,14 +722,14 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
             if (!context.mounted) return;
             Navigator.of(context).pop();
           },
-          child: const Text('Apply'),
+          child: const Text('適用'),
         ),
       ],
     );
   }
 
   String _stageLabel(int stage) {
-    return 'Stage $stage';
+    return 'ステージ $stage';
   }
 }
 

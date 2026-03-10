@@ -132,7 +132,7 @@ class _AvatarViewerState extends State<AvatarViewer> {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      'Loading avatar...',
+                      'アバター読み込み中...',
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 13,

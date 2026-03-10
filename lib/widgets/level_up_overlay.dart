@@ -87,7 +87,7 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'LEVEL UP!',
+                      'レベルアップ！',
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w900,
@@ -111,7 +111,7 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Tap to continue',
+                      'タップして続ける',
                       style: TextStyle(color: Colors.white54, fontSize: 14),
                     ),
                   ],

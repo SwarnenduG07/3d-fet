@@ -79,7 +79,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                       ),
                       const Expanded(
                         child: Text(
-                          'Mirror',
+                          '鏡',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -129,7 +129,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                           },
                         ),
                       _MirrorStat(
-                        label: 'Stage',
+                        label: 'ステージ',
                         value: profile.bodyStageLabel,
                       ),
                       Container(
@@ -138,7 +138,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
                       _MirrorStat(
-                        label: 'Level',
+                        label: 'レベル',
                         value: 'Lv.${profile.currentLevel}',
                       ),
                       Container(
@@ -147,7 +147,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
                       _MirrorStat(
-                        label: 'Total XP',
+                        label: '総XP',
                         value: '${profile.totalXP}',
                       ),
                     ],
@@ -213,7 +213,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Stage $stage',
+                                'ステージ $stage',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: isActive
@@ -267,7 +267,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                             ),
                             const SizedBox(height: 16),
                             const Text(
-                              'Body Transformation!',
+                              '体の変化！',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32,
@@ -289,7 +289,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                                 ),
                               ),
                               child: Text(
-                                'You\'ve reached ${profile.bodyStageLabel}!',
+                                '${profile.bodyStageLabel}に到達しました！',
                                 style: const TextStyle(
                                   color: AppColors.xpGold,
                                   fontSize: 20,
@@ -299,7 +299,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                             ),
                             const SizedBox(height: 32),
                             const Text(
-                              'Tap to continue',
+                              'タップして続ける',
                               style: TextStyle(
                                 color: Colors.white54,
                                 fontSize: 16,
