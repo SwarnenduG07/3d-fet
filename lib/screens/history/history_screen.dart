@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_colors.dart';
-import '../../providers/user_provider.dart';
-import '../../services/firestore_service.dart';
 import '../../providers/firestore_provider.dart';
 import '../../models/workout_record.dart';
 
@@ -26,20 +24,31 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _loadWorkouts() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
 
-    final workouts = await ref.read(firestoreServiceProvider).getWorkouts(uid);
-    if (mounted) {
-      setState(() {
-        _workouts = workouts;
-        _loading = false;
-      });
+    try {
+      final workouts = await ref.read(firestoreServiceProvider).getWorkouts(uid);
+      if (mounted) {
+        setState(() {
+          _workouts = workouts;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _workouts = [];
+          _loading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(userProfileProvider);
 
     // Calculate monthly stats
     final now = DateTime.now();

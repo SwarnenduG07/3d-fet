@@ -50,8 +50,8 @@ class _AvatarViewerState extends State<AvatarViewer> {
       let t = 0;
       function idle() {
         t += 0.016;
-        const breathe = 1 + Math.sin(t * 3.0) * 0.004;
-        const sway = Math.sin(t * 0.8) * 0.3;
+        const breathe = 1 + Math.sin(t * 3.0) * 0.003;
+        const sway = Math.sin(t * 0.8) * 0.2;
         mv.style.transform = 'scaleY(' + breathe + ') rotate(' + sway + 'deg)';
         requestAnimationFrame(idle);
       }
@@ -78,19 +78,19 @@ class _AvatarViewerState extends State<AvatarViewer> {
           alt: 'GrowMe Avatar',
           autoRotate: widget.autoRotate,
           autoRotateDelay: 2000,
-          rotationPerSecond: '10deg',
+          rotationPerSecond: '8deg',
           cameraControls: true,
           disableZoom: false,
-          cameraOrbit: widget.cameraOrbit ?? '0deg 85deg 3.5m',
+          cameraOrbit: widget.cameraOrbit ?? '0deg 85deg 3.2m',
           cameraTarget: widget.cameraTarget ?? '0m 0.85m 0m',
           fieldOfView: widget.fieldOfView ?? '36deg',
-          minCameraOrbit: 'auto auto 2.0m',
-          maxCameraOrbit: 'auto auto 8m',
+          minCameraOrbit: 'auto auto 2.2m',
+          maxCameraOrbit: 'auto auto 6m',
           backgroundColor: widget.backgroundColor,
           autoPlay: true,
           loading: Loading.eager,
           reveal: Reveal.auto,
-          interpolationDecay: 100,
+          interpolationDecay: 150,
           shadowIntensity: 0,
           debugLogging: false,
           interactionPrompt: widget.interactionPrompt

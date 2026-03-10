@@ -138,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   // XP and Protein stats
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                     child: Row(
                       children: [
                         Expanded(
@@ -157,7 +157,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: _StatCard(
                             icon: Icons.local_dining,
                             iconColor: AppColors.proteinGreen,
-                            label: 'Protein',
+                            label: 'プロテイン',
                             value: '${profile.protein}',
                             subValue: '',
                             progress: null,
@@ -168,10 +168,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-                  // 3D Avatar - full body display with interaction
+                  // 3D Avatar - compact view
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       child: AvatarViewer(
                         key: ValueKey(profile.avatarModelPath),
                         modelAsset: profile.avatarModelPath,
@@ -182,12 +182,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   // Action buttons
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     child: Column(
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.secondary.withValues(alpha: 0.3),
@@ -199,17 +199,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: ElevatedButton.icon(
                             onPressed: () => _showExerciseDialog(context, ref),
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                            label: const Text('トレーニング開始', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            icon: const Icon(Icons.play_arrow_rounded, size: 24),
+                            label: const Text('トレーニング開始', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         OutlinedButton.icon(
                           onPressed: () {
                             Navigator.of(context).push(
@@ -219,15 +219,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             side: const BorderSide(color: AppColors.secondary, width: 2),
                             backgroundColor: Colors.white.withValues(alpha: 0.9),
                           ),
-                          icon: const Icon(Icons.person_search, size: 24),
-                          label: const Text('鏡を見る', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                          icon: const Icon(Icons.person_search, size: 20),
+                          label: const Text('鏡を見る', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -436,15 +436,15 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -454,25 +454,25 @@ class _StatCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(icon, color: iconColor, size: 18),
+                child: Icon(icon, color: iconColor, size: 16),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: const TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -480,7 +480,7 @@ class _StatCard extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -489,7 +489,7 @@ class _StatCard extends StatelessWidget {
                 Text(
                   ' $subValue',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -497,14 +497,14 @@ class _StatCard extends StatelessWidget {
             ],
           ),
           if (progress != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               child: LinearProgressIndicator(
                 value: progress!,
                 backgroundColor: progressColor.withValues(alpha: 0.15),
                 color: progressColor,
-                minHeight: 6,
+                minHeight: 5,
               ),
             ),
           ],
