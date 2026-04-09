@@ -27,14 +27,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.softBlue.withValues(alpha: 0.3),
-              AppColors.softPink.withValues(alpha: 0.2),
-              AppColors.background,
+              Color(0xFFE8F4FD),
+              Color(0xFFF5F0FF),
+              Color(0xFFFFF8F0),
             ],
           ),
         ),
@@ -104,30 +104,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: const Icon(Icons.settings, size: 20, color: AppColors.textSecondary),
                           ),
                         ),
-                        // Body stage
+                        // Body stage — solid badge matching Lv style
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
+                            horizontal: 16,
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                AppColors.accent.withValues(alpha: 0.2),
-                                AppColors.accent.withValues(alpha: 0.1),
+                                AppColors.accent,
+                                Color(0xFF6BBF3C),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppColors.accent.withValues(alpha: 0.4),
-                              width: 1.5,
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accent.withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Text(
                             profile.bodyStageLabel,
                             style: const TextStyle(
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
@@ -168,14 +171,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-                  // 3D Avatar - compact view
+                  // 3D Avatar - full body, auto-centered
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: AvatarViewer(
                         key: ValueKey(profile.avatarModelPath),
                         modelAsset: profile.avatarModelPath,
                         backgroundColor: Colors.transparent,
+                        enableIdleAnimation: true,
                       ),
                     ),
                   ),

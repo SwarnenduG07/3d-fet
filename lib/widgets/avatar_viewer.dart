@@ -14,7 +14,7 @@ class AvatarViewer extends StatefulWidget {
 
   const AvatarViewer({
     super.key,
-    this.modelAsset = 'assets/models/avatar_default.glb',
+    this.modelAsset = 'assets/mii_male/stage_1.glb',
     this.backgroundColor = const Color(0xFFFFFBF5),
     this.autoRotate = true,
     this.cameraOrbit,
@@ -38,9 +38,13 @@ class _AvatarViewerState extends State<AvatarViewer> {
 
   String get _relatedCss => '''
     model-viewer#avatar {
-      transform-origin: center bottom;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
       will-change: transform;
       contain: layout style paint;
+      --poster-color: transparent;
+      outline: none;
     }
   ''';
 
@@ -50,9 +54,10 @@ class _AvatarViewerState extends State<AvatarViewer> {
       let t = 0;
       function idle() {
         t += 0.016;
-        const breathe = 1 + Math.sin(t * 3.0) * 0.003;
-        const sway = Math.sin(t * 0.8) * 0.2;
-        mv.style.transform = 'scaleY(' + breathe + ') rotate(' + sway + 'deg)';
+        const breathe = 1 + Math.sin(t * 2.5) * 0.004;
+        const floatY  = Math.sin(t * 1.2) * 0.3;
+        mv.style.transform =
+          'scaleY(' + breathe + ') translateY(' + floatY + 'px)';
         requestAnimationFrame(idle);
       }
       requestAnimationFrame(idle);
@@ -77,26 +82,28 @@ class _AvatarViewerState extends State<AvatarViewer> {
           src: widget.modelAsset,
           alt: 'GrowMe Avatar',
           autoRotate: widget.autoRotate,
-          autoRotateDelay: 2000,
-          rotationPerSecond: '8deg',
+          autoRotateDelay: 1500,
+          rotationPerSecond: '10deg',
           cameraControls: true,
+          disablePan: true,
           disableZoom: false,
-          cameraOrbit: widget.cameraOrbit ?? '0deg 85deg 3.2m',
-          cameraTarget: widget.cameraTarget ?? '0m 0.85m 0m',
-          fieldOfView: widget.fieldOfView ?? '36deg',
-          minCameraOrbit: 'auto auto 2.2m',
-          maxCameraOrbit: 'auto auto 6m',
+          cameraOrbit: widget.cameraOrbit ?? '0deg 85deg 105%',
+          cameraTarget: widget.cameraTarget ?? 'auto auto auto',
+          fieldOfView: widget.fieldOfView ?? '45deg',
+          minCameraOrbit: 'auto auto 80%',
+          maxCameraOrbit: 'auto auto 150%',
           backgroundColor: widget.backgroundColor,
           autoPlay: true,
           loading: Loading.eager,
           reveal: Reveal.auto,
-          interpolationDecay: 150,
-          shadowIntensity: 0,
+          interpolationDecay: 200,
+          shadowIntensity: 0.6,
+          shadowSoftness: 0.8,
           debugLogging: false,
           interactionPrompt: widget.interactionPrompt
               ? InteractionPrompt.auto
               : InteractionPrompt.none,
-          touchAction: TouchAction.panY,
+          touchAction: TouchAction.none,
           relatedCss: _relatedCss,
           relatedJs: _relatedJs,
           javascriptChannels: {
@@ -113,7 +120,7 @@ class _AvatarViewerState extends State<AvatarViewer> {
           ignoring: _isModelLoaded,
           child: AnimatedOpacity(
             opacity: _isModelLoaded ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 600),
             child: Container(
               color: widget.backgroundColor,
               child: const Center(

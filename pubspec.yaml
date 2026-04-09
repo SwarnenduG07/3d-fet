@@ -28,3 +28,5 @@ flutter:
     - assets/models/
     - assets/models/male/
     - assets/models/female/
+    - assets/mii_male/
+    - assets/mii_female/

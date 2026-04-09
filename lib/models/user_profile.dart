@@ -63,60 +63,40 @@ class UserProfile {
     );
   }
 
-  /// Calculates the starting body stage from height (cm) and weight (kg)
-  /// using BMI. Higher BMI = fatter = lower stage number.
+  /// Everyone starts at Stage 1 (Slim) — body stage is driven by level progression.
   static int initialBodyStage(double heightCm, double weightKg) {
-    final heightM = heightCm / 100.0;
-    final bmi = weightKg / (heightM * heightM);
-    // BMI >= 30  → Stage 1 (xl, fattest - needs most improvement)
-    // BMI 25–30  → Stage 2 (x, overweight)
-    // BMI 22–25  → Stage 3 (sx, normal)
-    // BMI 18.5–22 → Stage 4 (sm, fit - already good shape)
-    // BMI < 18.5  → Stage 4 (sm, lean)
-    if (bmi >= 30) return 1;
-    if (bmi >= 25) return 2;
-    if (bmi >= 22) return 3;
-    return 4;
+    return 1;
   }
 
   String get bodyStageLabel {
     switch (bodyStage) {
       case 1:
-        return 'Stage 1';
+        return 'スリム';
       case 2:
-        return 'Stage 2';
+        return 'トーン';
       case 3:
-        return 'Stage 3';
+        return 'マッスル';
       case 4:
-        return 'Stage 4';
+        return 'アスリート';
       case 5:
-        return 'Stage 5';
+        return '理想の体型';
       default:
-        return 'Stage 1';
+        return 'スリム';
     }
   }
 
-  /// Returns the GLB model asset path based on gender and current body stage.
-  /// xl = fattest (start), x = less fat, sx = fit, sm = ideal (goal).
+  /// Returns the Mii GLB model path for the current gender and body stage (1–5).
   String get avatarModelPath {
-    final folder = gender == Gender.male ? 'male' : 'female';
-    final suffix = gender == Gender.male ? 'm' : 'fm';
-    final String size;
-    switch (bodyStage) {
-      case 1:
-        size = 'xl';
-      case 2:
-        size = 'x';
-      case 3:
-        size = 'sx';
-      case 4:
-      case 5:
-        size = 'sm';
-      default:
-        size = 'xl';
+    final stage = bodyStage.clamp(1, 5);
+    if (gender == Gender.male) {
+      return 'assets/mii_male/stage_$stage.glb';
+    } else {
+      return 'assets/mii_female/stage_$stage.glb';
     }
-    return 'assets/models/$folder/${size}_$suffix.glb';
   }
+
+  /// Mirror screen uses the same stage model.
+  String get mirrorModelPath => avatarModelPath;
 
   String get goalTypeLabel {
     switch (goalType) {
