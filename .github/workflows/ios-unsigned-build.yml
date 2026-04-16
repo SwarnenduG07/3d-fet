@@ -1,0 +1,78 @@
+name: iOS Unsigned Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-ios-unsigned:
+    name: Build iOS Unsigned Artifacts
+    runs-on: macos-14
+    timeout-minutes: 75
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show tool versions
+        run: |
+          flutter --version
+          xcodebuild -version
+          ruby --version
+
+      - name: Get Flutter packages
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Build unsigned iOS app (.app)
+        run: flutter build ios --release --no-codesign
+
+      - name: Build unsigned iOS IPA (.ipa)
+        run: flutter build ipa --release --no-codesign
+
+      - name: Verify build outputs exist
+        run: |
+          test -d build/ios/iphoneos/Runner.app
+          test -f build/ios/ipa/Runner.ipa
+
+      - name: Zip Runner.app
+        run: |
+          cd build/ios/iphoneos
+          ditto -c -k --sequesterRsrc --keepParent Runner.app Runner.app.zip
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa-${{ github.run_number }}
+          path: build/ios/ipa/Runner.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload unsigned .app zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-app-${{ github.run_number }}
+          path: build/ios/iphoneos/Runner.app.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Xcode archive (optional)
+        if: ${{ hashFiles('build/ios/archive/Runner.xcarchive/**') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-xcarchive-${{ github.run_number }}
+          path: build/ios/archive/Runner.xcarchive
+          retention-days: 14

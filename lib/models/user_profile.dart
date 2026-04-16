@@ -98,6 +98,15 @@ class UserProfile {
   /// Mirror screen uses the same stage model.
   String get mirrorModelPath => avatarModelPath;
 
+  /// Home screen uses a dedicated gender-based home model.
+  String get homeModelPath {
+    if (gender == Gender.male) {
+      return 'assets/mii_male/home.glb';
+    } else {
+      return 'assets/mii_female/home.glb';
+    }
+  }
+
   String get goalTypeLabel {
     switch (goalType) {
       case GoalType.muscleGain:

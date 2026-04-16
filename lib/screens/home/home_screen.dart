@@ -176,8 +176,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: AvatarViewer(
-                        key: ValueKey(profile.avatarModelPath),
-                        modelAsset: profile.avatarModelPath,
+                        key: ValueKey(profile.homeModelPath),
+                        modelAsset: profile.homeModelPath,
                         backgroundColor: Colors.transparent,
                         enableIdleAnimation: true,
                       ),
