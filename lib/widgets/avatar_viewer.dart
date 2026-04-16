@@ -16,7 +16,7 @@ class AvatarViewer extends StatefulWidget {
     super.key,
     this.modelAsset = 'assets/mii_male/stage_1.glb',
     this.backgroundColor = const Color(0xFFFFFBF5),
-    this.autoRotate = true,
+    this.autoRotate = false,
     this.cameraOrbit,
     this.cameraTarget,
     this.fieldOfView,
