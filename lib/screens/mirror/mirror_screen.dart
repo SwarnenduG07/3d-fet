@@ -118,7 +118,6 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       if (profile.bodyChangeFlag)
                         TweenAnimationBuilder<double>(
@@ -145,27 +144,40 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                             setState(() {});
                           },
                         ),
-                      _MirrorStat(
-                        label: 'ステージ',
-                        value: profile.bodyStageLabel,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 36,
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
-                      _MirrorStat(
-                        label: 'レベル',
-                        value: 'Lv.${profile.currentLevel}',
-                      ),
-                      Container(
-                        width: 1,
-                        height: 36,
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
-                      _MirrorStat(
-                        label: '総XP',
-                        value: '${profile.totalXP}',
+                      if (profile.bodyChangeFlag) const SizedBox(width: 10),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _MirrorStat(
+                                label: 'ステージ',
+                                value: profile.bodyStageLabel,
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 36,
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            Expanded(
+                              child: _MirrorStat(
+                                label: 'レベル',
+                                value: 'Lv.${profile.currentLevel}',
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 36,
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            Expanded(
+                              child: _MirrorStat(
+                                label: '総XP',
+                                value: '${profile.totalXP}',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -178,6 +190,9 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                     child: AvatarViewer(
                       key: ValueKey(profile.mirrorModelPath),
                       modelAsset: profile.mirrorModelPath,
+                      cameraOrbit: profile.mirrorCameraOrbit,
+                      cameraTarget: profile.mirrorCameraTarget,
+                      fieldOfView: profile.mirrorFieldOfView,
                       backgroundColor: const Color(0xFF1A1A2E),
                       autoRotate: false,
                       interactionPrompt: false,
@@ -344,6 +359,8 @@ class _MirrorStat extends StatelessWidget {
       children: [
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,

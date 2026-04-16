@@ -43,6 +43,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     }
   }
 
+  void _previousPage() {
+    if (_currentPage <= 0) return;
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Future<void> _completeSetup() async {
     await ref.read(userProfileProvider.notifier).createProfile(
           gender: _gender,
@@ -77,7 +85,18 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _currentPage > 0 ? _previousPage : null,
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
               // Progress indicator
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),

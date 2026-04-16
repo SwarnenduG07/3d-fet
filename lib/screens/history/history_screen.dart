@@ -24,17 +24,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _loadWorkouts() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    print('🔍 Loading workouts for user: $uid');
+    debugPrint('Loading workouts for user: $uid');
     
     if (uid == null) {
-      print('❌ No user ID found');
+      debugPrint('No user ID found');
       if (mounted) setState(() => _loading = false);
       return;
     }
 
     try {
       final workouts = await ref.read(firestoreServiceProvider).getWorkouts(uid);
-      print('✅ Loaded ${workouts.length} workouts');
+      debugPrint('Loaded ${workouts.length} workouts');
       if (mounted) {
         setState(() {
           _workouts = workouts;
@@ -42,7 +42,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         });
       }
     } catch (e) {
-      print('❌ Error loading workouts: $e');
+      debugPrint('Error loading workouts: $e');
       if (mounted) {
         setState(() {
           _workouts = [];
@@ -119,7 +119,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         Icons.local_fire_department,
                         AppColors.accentOrange,
                         '合計回数',
-                        '${totalCount}回',
+                        '$totalCount回',
                       ),
                       Container(
                         width: 1,
@@ -130,7 +130,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         Icons.timer,
                         AppColors.secondary,
                         '合計時間',
-                        '${totalMinutes}分',
+                        '$totalMinutes分',
                       ),
                       Container(
                         width: 1,

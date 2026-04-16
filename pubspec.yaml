@@ -1,6 +1,6 @@
 name: games
 description: "GrowMe - 3D Avatar Fitness Training App"
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -15,6 +15,7 @@ dependencies:
   firebase_core: ^3.12.0
   firebase_auth: ^5.5.0
   cloud_firestore: ^5.6.0
+  google_sign_in: ^6.3.0
 
 dev_dependencies:
   flutter_test:

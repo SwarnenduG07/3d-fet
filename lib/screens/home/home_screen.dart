@@ -178,6 +178,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: AvatarViewer(
                         key: ValueKey(profile.homeModelPath),
                         modelAsset: profile.homeModelPath,
+                        cameraOrbit: profile.homeCameraOrbit,
+                        cameraTarget: profile.homeCameraTarget,
                         backgroundColor: Colors.transparent,
                         enableIdleAnimation: true,
                       ),
@@ -905,7 +907,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
-                '体の変化はレベル10、20、30、40で発生します',
+                '体の変化はレベル10、25、40、50で発生します',
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),

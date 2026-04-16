@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../models/workout_record.dart';
 import '../services/firestore_service.dart';
@@ -124,9 +125,9 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
         earnedXP: earnedXP,
         earnedProtein: earnedProtein,
       );
-      print('💾 Saving workout: ${workout.duration} min, ${workout.earnedXP} XP');
+      debugPrint('Saving workout: ${workout.duration} min, ${workout.earnedXP} XP');
       await _firestore.saveWorkout(workout);
-      print('✅ Workout saved successfully');
+      debugPrint('Workout saved successfully');
     }
   }
 
@@ -171,11 +172,16 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
   }
 
   int _bodyStageForLevel(int level) {
-    if (level <= 10) return 1;
-    if (level <= 20) return 2;
-    if (level <= 30) return 3;
-    if (level <= 40) return 4;
+    if (level < 10) return 1;
+    if (level < 25) return 2;
+    if (level < 40) return 3;
+    if (level < 50) return 4;
     return 5;
+  }
+
+  void clearLocalState() {
+    _uid = null;
+    state = null;
   }
 
   Future<void> resetProfile() async {
