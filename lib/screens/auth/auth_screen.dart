@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/app_colors.dart';
+import '../../models/user_profile.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -15,16 +18,41 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  Gender _selectedGender = Gender.male;
+  DateTime? _dateOfBirth;
 
   bool _isLogin = true;
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _rememberLogin = true;
+
+  static const String _rememberLoginKey = 'remember_login';
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveRememberPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_rememberLoginKey, _rememberLogin);
+  }
+
+  Future<void> _saveRegistrationMeta({required User user}) async {
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'name': _nameController.text.trim(),
+      'gender': _selectedGender.name,
+      'dateOfBirth': _dateOfBirth == null
+          ? null
+          : Timestamp.fromDate(_dateOfBirth!),
+      'email': _emailController.text.trim(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> _submitEmailAuth() async {
@@ -41,11 +69,17 @@ class _AuthScreenState extends State<AuthScreen> {
           password: password,
         );
       } else {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+        if (credential.user != null) {
+          await _saveRegistrationMeta(user: credential.user!);
+        }
       }
+
+      await _saveRememberPreference();
     } on FirebaseAuthException catch (e) {
       _showError(_readableAuthError(e));
     } catch (_) {
@@ -73,6 +107,7 @@ class _AuthScreenState extends State<AuthScreen> {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
+      await _saveRememberPreference();
     } on FirebaseAuthException catch (e) {
       _showError(_readableAuthError(e));
     } catch (_) {
@@ -106,6 +141,20 @@ class _AuthScreenState extends State<AuthScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
+  }
+
+  Future<void> _pickDateOfBirth() async {
+    final now = DateTime.now();
+    final initialDate = _dateOfBirth ?? DateTime(now.year - 20, 1, 1);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900, 1, 1),
+      lastDate: now,
+    );
+    if (picked != null) {
+      setState(() => _dateOfBirth = picked);
+    }
   }
 
   @override
@@ -156,11 +205,71 @@ class _AuthScreenState extends State<AuthScreen> {
                           Text(
                             _isLogin
                                 ? 'メール/パスワードまたはGoogleでログイン'
-                                : 'メール登録後にログインできます',
+                                : '会員登録フォームを入力してください',
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: AppColors.textSecondary),
                           ),
                           const SizedBox(height: 20),
+                          if (!_isLogin) ...[
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                labelText: '名前',
+                                prefixIcon: Icon(Icons.person_outline),
+                              ),
+                              validator: (value) {
+                                if (_isLogin) return null;
+                                final text = value?.trim() ?? '';
+                                if (text.isEmpty) return '名前を入力してください。';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<Gender>(
+                              initialValue: _selectedGender,
+                              decoration: const InputDecoration(
+                                labelText: '性別',
+                                prefixIcon: Icon(Icons.wc_outlined),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: Gender.male,
+                                  child: Text('男性'),
+                                ),
+                                DropdownMenuItem(
+                                  value: Gender.female,
+                                  child: Text('女性'),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() => _selectedGender = value);
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: _pickDateOfBirth,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: '生年月日',
+                                  prefixIcon: Icon(Icons.cake_outlined),
+                                ),
+                                child: Text(
+                                  _dateOfBirth == null
+                                      ? '日付を選択してください'
+                                      : '${_dateOfBirth!.year}/${_dateOfBirth!.month.toString().padLeft(2, '0')}/${_dateOfBirth!.day.toString().padLeft(2, '0')}',
+                                  style: TextStyle(
+                                    color: _dateOfBirth == null
+                                        ? AppColors.textSecondary
+                                        : AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
@@ -200,9 +309,39 @@ class _AuthScreenState extends State<AuthScreen> {
                               return null;
                             },
                           ),
+                          if (!_isLogin && _dateOfBirth == null)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 8),
+                              child: Text(
+                                '生年月日を選択してください。',
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+                          CheckboxListTile(
+                            value: _rememberLogin,
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            onChanged: (value) {
+                              setState(() => _rememberLogin = value ?? true);
+                            },
+                            title: const Text('ログイン状態を保存する'),
+                            controlAffinity: ListTileControlAffinity.leading,
+                          ),
                           const SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: _isLoading ? null : _submitEmailAuth,
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                    if (!_isLogin && _dateOfBirth == null) {
+                                      _showError('生年月日を選択してください。');
+                                      return;
+                                    }
+                                    _submitEmailAuth();
+                                  },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
@@ -219,7 +358,8 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                           const SizedBox(height: 12),
                           OutlinedButton.icon(
-                            onPressed: _isLoading ? null : _signInWithGoogle,
+                            onPressed:
+                                _isLoading || !_isLogin ? null : _signInWithGoogle,
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(

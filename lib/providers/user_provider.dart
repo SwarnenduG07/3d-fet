@@ -32,6 +32,9 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
   FirestoreService get _firestore => ref.read(firestoreServiceProvider);
 
   String? _uid;
+  UserProfile? _testSnapshot;
+
+  bool get hasActiveTestPreview => _testSnapshot != null;
 
   Future<void> loadFromFirestore(String uid) async {
     _uid = uid;
@@ -138,6 +141,8 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     required int bodyStage,
   }) async {
     if (state == null) return;
+    _testSnapshot ??= state;
+
     final previousLevel = state!.currentLevel;
     final previousStage = state!.bodyStage;
     state = state!.copyWith(
@@ -150,9 +155,14 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     if (level > previousLevel) {
       ref.read(levelUpEventProvider.notifier).trigger(level);
     }
-    if (_uid != null) {
-      await _firestore.updateUserProfile(_uid!, state!.toFirestoreUpdate());
-    }
+    // Debug test values are intentionally local-only and not persisted.
+  }
+
+  void restoreFromTestPreview() {
+    if (_testSnapshot == null) return;
+    state = _testSnapshot;
+    _testSnapshot = null;
+    ref.read(levelUpEventProvider.notifier).clear();
   }
 
   void clearBodyChangeFlag() {
@@ -181,11 +191,13 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
 
   void clearLocalState() {
     _uid = null;
+    _testSnapshot = null;
     state = null;
   }
 
   Future<void> resetProfile() async {
     if (state == null || _uid == null) return;
+    _testSnapshot = null;
     final initialStage = UserProfile.initialBodyStage(state!.height, state!.weight);
     state = state!.copyWith(
       currentLevel: 1,

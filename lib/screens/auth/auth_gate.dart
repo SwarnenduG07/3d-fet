@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import 'auth_screen.dart';
@@ -15,19 +16,37 @@ class AuthGate extends ConsumerStatefulWidget {
 }
 
 class _AuthGateState extends ConsumerState<AuthGate> {
+  static const String _rememberLoginKey = 'remember_login';
+
   String? _loadedUid;
   bool _isLoadingProfile = false;
+  bool _isCheckingPersistence = false;
 
   void _loadProfileForUser(String uid) {
     if (_isLoadingProfile || _loadedUid == uid) return;
 
     _isLoadingProfile = true;
     Future<void>(() async {
+      _isCheckingPersistence = true;
+      final prefs = await SharedPreferences.getInstance();
+      final remember = prefs.getBool(_rememberLoginKey) ?? true;
+      if (!remember) {
+        await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
+        setState(() {
+          _loadedUid = null;
+          _isLoadingProfile = false;
+          _isCheckingPersistence = false;
+        });
+        return;
+      }
+
       await ref.read(userProfileProvider.notifier).loadFromFirestore(uid);
       if (!mounted) return;
       setState(() {
         _loadedUid = uid;
         _isLoadingProfile = false;
+        _isCheckingPersistence = false;
       });
     });
   }
@@ -45,6 +64,14 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           );
         }
 
+        if (_isCheckingPersistence) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.secondary),
+            ),
+          );
+        }
+
         final user = snapshot.data;
         if (user == null) {
           if (_loadedUid != null || ref.read(userProfileProvider) != null) {
@@ -52,6 +79,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           }
           _loadedUid = null;
           _isLoadingProfile = false;
+          _isCheckingPersistence = false;
           return const AuthScreen();
         }
 

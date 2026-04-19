@@ -26,22 +26,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE8F4FD),
-              Color(0xFFF5F0FF),
-              Color(0xFFFFF8F0),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Column(
+      body: Stack(
+        children: [
+          // Main content with gradient background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFE8F4FD),
+                  Color(0xFFF5F0FF),
+                  Color(0xFFFFF8F0),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
                 children: [
                   // Top stats bar
                   Padding(
@@ -49,42 +50,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Level badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [AppColors.secondary, AppColors.secondary.withValues(alpha: 0.8)],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.secondary.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                        Row(
+                          children: [
+                            if (Navigator.of(context).canPop())
+                              IconButton(
+                                onPressed: () => Navigator.of(context).maybePop(),
+                                icon: const Icon(Icons.arrow_back_ios_new_rounded),
                               ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.white, size: 18),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Lv.${profile.currentLevel}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.secondary,
+                                    AppColors.secondary.withValues(alpha: 0.8),
+                                  ],
                                 ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        AppColors.secondary.withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.star,
+                                      color: Colors.white, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Lv.${profile.currentLevel}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        // Settings button
                         GestureDetector(
                           onTap: () => _showSettingsMenu(context, ref),
                           child: Container(
@@ -101,7 +113,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.settings, size: 20, color: AppColors.textSecondary),
+                            child: const Icon(
+                              Icons.settings,
+                              size: 20,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                         // Body stage — solid badge matching Lv style
@@ -111,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
+                            gradient: const LinearGradient(
                               colors: [
                                 AppColors.accent,
                                 Color(0xFF6BBF3C),
@@ -181,7 +197,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         cameraOrbit: profile.homeCameraOrbit,
                         cameraTarget: profile.homeCameraTarget,
                         backgroundColor: Colors.transparent,
-                        enableIdleAnimation: true,
+                        interactionPrompt: false,
+                        enableIdleAnimation: false,
                       ),
                     ),
                   ),
@@ -240,18 +257,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-
-              // Level-up overlay
-              if (levelUpEvent != null)
-                LevelUpOverlay(
-                  newLevel: levelUpEvent,
-                  onDismiss: () {
-                    ref.read(levelUpEventProvider.notifier).clear();
-                  },
-                ),
-            ],
+            ),
           ),
-        ),
+
+          // Level-up overlay — rendered outside SafeArea so it covers the
+          // full screen (including status bar) and centers perfectly.
+          if (levelUpEvent != null)
+            LevelUpOverlay(
+              newLevel: levelUpEvent,
+              onDismiss: () {
+                ref.read(levelUpEventProvider.notifier).clear();
+              },
+            ),
+        ],
       ),
     );
   }
@@ -286,14 +304,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(Icons.bug_report, color: AppColors.textSecondary),
-              title: const Text('デバッグテストパネル'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDebugDialog(context, ref);
-              },
-            ),
+
             ListTile(
               leading: const Icon(Icons.refresh, color: AppColors.accentOrange),
               title: const Text('進捗をリセット'),
@@ -402,14 +413,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showDebugDialog(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(userProfileProvider);
-    if (profile == null) return;
-    showDialog(
-      context: context,
-      builder: (ctx) => _DebugTestDialog(ref: ref, profile: profile),
-    );
-  }
 
   void _showExerciseDialog(BuildContext context, WidgetRef ref) {
     showDialog(
@@ -907,7 +910,7 @@ class _DebugTestDialogState extends State<_DebugTestDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
-                '体の変化はレベル10、25、40、50で発生します',
+                '体の変化はレベル10、25、40、50で発生します\nミラー画面を閉じるとテスト値は自動で元に戻ります',
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),

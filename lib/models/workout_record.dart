@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WorkoutRecord {
+  final String? id;
   final String userId;
   final DateTime startTime;
   final DateTime endTime;
@@ -10,6 +11,7 @@ class WorkoutRecord {
   final DateTime? createdAt;
 
   const WorkoutRecord({
+    this.id,
     required this.userId,
     required this.startTime,
     required this.endTime,
@@ -29,8 +31,12 @@ class WorkoutRecord {
         'createdAt': FieldValue.serverTimestamp(),
       };
 
-  factory WorkoutRecord.fromFirestore(Map<String, dynamic> data) {
+  factory WorkoutRecord.fromFirestore(
+    Map<String, dynamic> data, {
+    String? id,
+  }) {
     return WorkoutRecord(
+      id: id,
       userId: data['userId'] as String,
       startTime: (data['startTime'] as Timestamp).toDate(),
       endTime: (data['endTime'] as Timestamp).toDate(),

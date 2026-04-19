@@ -52,6 +52,76 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
   }
 
+  Future<void> _deleteWorkout(WorkoutRecord workout) async {
+    final id = workout.id;
+    if (id == null) return;
+    await ref.read(firestoreServiceProvider).deleteWorkout(id);
+    if (!mounted) return;
+    setState(() {
+      _workouts.removeWhere((w) => w.id == id);
+    });
+  }
+
+  Future<void> _deleteAllWorkouts() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    await ref.read(firestoreServiceProvider).deleteAllWorkouts(uid);
+    if (!mounted) return;
+    setState(() {
+      _workouts = [];
+    });
+  }
+
+  Future<bool> _confirmDeleteOne(WorkoutRecord workout) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('履歴を削除'),
+        content: const Text('この履歴を削除しますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+    if (result == true) {
+      await _deleteWorkout(workout);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _confirmDeleteAll() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('全履歴を削除'),
+        content: const Text('すべての履歴を削除しますか？この操作は取り消せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('全削除'),
+          ),
+        ],
+      ),
+    );
+    if (result == true) {
+      await _deleteAllWorkouts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -73,6 +143,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
+                  if (Navigator.of(context).canPop())
+                    IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
                   const Text(
                     'ワークアウト履歴',
                     style: TextStyle(
@@ -80,6 +155,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
+                  ),
+                  const Spacer(),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
+                      if (value == 'delete_all') {
+                        _confirmDeleteAll();
+                      }
+                    },
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: 'delete_all',
+                        child: Text('履歴を全削除'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -175,92 +265,107 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       itemCount: _workouts.length,
       itemBuilder: (context, index) {
         final workout = _workouts[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        return Dismissible(
+          key: ValueKey(workout.id ?? '${workout.startTime.millisecondsSinceEpoch}_$index'),
+          direction: DismissDirection.endToStart,
+          confirmDismiss: (_) => _confirmDeleteOne(workout),
+          background: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            alignment: Alignment.centerRight,
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                child: const Icon(
-                  Icons.fitness_center,
-                  color: AppColors.secondary,
-                  size: 24,
+              ],
+            ),
+            child: Row(
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.fitness_center,
+                    color: AppColors.secondary,
+                    size: 24,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 16),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'エクササイズ',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(workout.startTime),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Stats
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'エクササイズ',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                    Text(
+                      '${workout.duration}分',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      _formatDate(workout.startTime),
+                      '+${workout.earnedXP} XP',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.xpGold,
+                      ),
+                    ),
+                    Text(
+                      '+${workout.earnedProtein} プロテイン',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.proteinGreen,
                       ),
                     ),
                   ],
                 ),
-              ),
-              // Stats
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${workout.duration}分',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '+${workout.earnedXP} XP',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.xpGold,
-                    ),
-                  ),
-                  Text(
-                    '+${workout.earnedProtein} プロテイン',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.proteinGreen,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

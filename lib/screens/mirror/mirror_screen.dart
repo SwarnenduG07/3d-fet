@@ -44,6 +44,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
 
   @override
   void dispose() {
+    ref.read(userProfileProvider.notifier).restoreFromTestPreview();
     _animController.dispose();
     super.dispose();
   }
@@ -73,7 +74,12 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () {
+                          ref
+                              .read(userProfileProvider.notifier)
+                              .restoreFromTestPreview();
+                          Navigator.of(context).pop();
+                        },
                         icon: const Icon(Icons.arrow_back_ios_new,
                             color: Colors.white),
                       ),

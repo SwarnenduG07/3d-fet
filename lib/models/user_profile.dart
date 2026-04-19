@@ -109,37 +109,37 @@ class UserProfile {
 
   String get homeCameraOrbit {
     if (gender == Gender.male) {
-      return '0deg 82deg 112%';
+      return '0deg 84deg 108%';
     }
-    return '0deg 82deg 110%';
+    return '45deg 84deg 108%';
   }
 
   String get homeCameraTarget {
     if (gender == Gender.male) {
-      return '0m 0.92m 0m';
+      return '2.5m 3m 1.6m';
     }
-    return '0m 0.90m 0m';
+    return '-0.77m 2.6m 1.1m';
   }
 
   String get mirrorCameraOrbit {
     if (gender == Gender.male) {
-      return '0deg 78deg 130%';
+      return '0deg 80deg 122%';
     }
-    return '0deg 78deg 135%';
+    return '0deg 80deg 122%';
   }
 
   String get mirrorCameraTarget {
     if (gender == Gender.male) {
-      return '0m 0.95m 0m';
+      return '0m 0.45m 0.4m';
     }
-    return '0m 0.92m 0m';
+    return '-0.07m 0.96m 0.45m';
   }
 
   String get mirrorFieldOfView {
     if (gender == Gender.male) {
-      return '44deg';
+      return '47deg';
     }
-    return '48deg';
+    return '47deg';
   }
 
   String get goalTypeLabel {
@@ -187,19 +187,57 @@ class UserProfile {
       };
 
   factory UserProfile.fromFirestore(Map<String, dynamic> data) {
+    double toDouble(dynamic value, double fallback) {
+      if (value is num) return value.toDouble();
+      return double.tryParse('$value') ?? fallback;
+    }
+
+    int toInt(dynamic value, int fallback) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      return int.tryParse('$value') ?? fallback;
+    }
+
+    bool toBool(dynamic value, bool fallback) {
+      if (value is bool) return value;
+      if (value is String) {
+        if (value.toLowerCase() == 'true') return true;
+        if (value.toLowerCase() == 'false') return false;
+      }
+      return fallback;
+    }
+
+    Gender parseGender(dynamic value) {
+      if (value is String) {
+        for (final gender in Gender.values) {
+          if (gender.name == value) return gender;
+        }
+      }
+      return Gender.male;
+    }
+
+    GoalType parseGoalType(dynamic value) {
+      if (value is String) {
+        for (final goal in GoalType.values) {
+          if (goal.name == value) return goal;
+        }
+      }
+      return GoalType.muscleGain;
+    }
+
     return UserProfile(
-      gender: Gender.values.byName(data['gender'] as String),
-      height: (data['height'] as num).toDouble(),
-      weight: (data['weight'] as num).toDouble(),
-      targetWeight: (data['targetWeight'] as num).toDouble(),
-      goalType: GoalType.values.byName(data['goalType'] as String),
-      targetDays: data['targetDays'] as int? ?? 30,
-      currentLevel: data['currentLevel'] as int? ?? 1,
-      currentXP: data['currentXP'] as int? ?? 0,
-      totalXP: data['totalXP'] as int? ?? 0,
-      protein: data['protein'] as int? ?? 0,
-      bodyStage: data['bodyStage'] as int? ?? 1,
-      bodyChangeFlag: data['bodyChangeFlag'] as bool? ?? false,
+      gender: parseGender(data['gender']),
+      height: toDouble(data['height'], 170),
+      weight: toDouble(data['weight'], 70),
+      targetWeight: toDouble(data['targetWeight'], 65),
+      goalType: parseGoalType(data['goalType']),
+      targetDays: toInt(data['targetDays'], 30),
+      currentLevel: toInt(data['currentLevel'], 1),
+      currentXP: toInt(data['currentXP'], 0),
+      totalXP: toInt(data['totalXP'], 0),
+      protein: toInt(data['protein'], 0),
+      bodyStage: toInt(data['bodyStage'], 1),
+      bodyChangeFlag: toBool(data['bodyChangeFlag'], false),
     );
   }
 
