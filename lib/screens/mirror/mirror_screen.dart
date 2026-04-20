@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
@@ -61,13 +62,19 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
     final profile = ref.watch(userProfileProvider);
     if (profile == null) return const SizedBox.shrink();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1A1A2E),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
                 // Top bar
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
@@ -194,7 +201,9 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: AvatarViewer(
-                      key: ValueKey(profile.mirrorModelPath),
+                      key: ValueKey(
+                        '${profile.mirrorModelPath}-${profile.mirrorCameraOrbit}-${profile.mirrorCameraTarget}-${profile.mirrorFieldOfView}',
+                      ),
                       modelAsset: profile.mirrorModelPath,
                       cameraOrbit: profile.mirrorCameraOrbit,
                       cameraTarget: profile.mirrorCameraTarget,
@@ -346,7 +355,8 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                   ),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -377,7 +387,7 @@ class _MirrorStat extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: Colors.white.withValues(alpha: 0.95),
             fontSize: 12,
           ),
         ),

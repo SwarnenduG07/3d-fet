@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/user_profile.dart';
@@ -24,26 +25,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final levelUpEvent = ref.watch(levelUpEventProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          // Main content with gradient background
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFE8F4FD),
-                  Color(0xFFF5F0FF),
-                  Color(0xFFFFF8F0),
-                ],
-              ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFE8F4FD),
+                Color(0xFFF5F0FF),
+                Color(0xFFFFF8F0),
+              ],
             ),
-            child: SafeArea(
-              child: Column(
-                children: [
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
                   // Top stats bar
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -127,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               colors: [
                                 AppColors.accent,
                                 Color(0xFF6BBF3C),
@@ -196,6 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         modelAsset: profile.homeModelPath,
                         cameraOrbit: profile.homeCameraOrbit,
                         cameraTarget: profile.homeCameraTarget,
+                        fieldOfView: profile.homeFieldOfView,
                         backgroundColor: Colors.transparent,
                         interactionPrompt: false,
                         enableIdleAnimation: false,
@@ -257,19 +264,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
+
+              // Level-up overlay
+                if (levelUpEvent != null)
+                  LevelUpOverlay(
+                    newLevel: levelUpEvent,
+                    onDismiss: () {
+                      ref.read(levelUpEventProvider.notifier).clear();
+                    },
+                  ),
+              ],
             ),
           ),
-
-          // Level-up overlay — rendered outside SafeArea so it covers the
-          // full screen (including status bar) and centers perfectly.
-          if (levelUpEvent != null)
-            LevelUpOverlay(
-              newLevel: levelUpEvent,
-              onDismiss: () {
-                ref.read(levelUpEventProvider.notifier).clear();
-              },
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -304,7 +311,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
+            ListTile(
+              leading: const Icon(Icons.bug_report, color: AppColors.textSecondary),
+              title: const Text('デバッグテストパネル'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showDebugDialog(context, ref);
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.refresh, color: AppColors.accentOrange),
               title: const Text('進捗をリセット'),
@@ -413,6 +427,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _showDebugDialog(BuildContext context, WidgetRef ref) {
+    final profile = ref.read(userProfileProvider);
+    if (profile == null) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => _DebugTestDialog(ref: ref, profile: profile),
+    );
+  }
 
   void _showExerciseDialog(BuildContext context, WidgetRef ref) {
     showDialog(

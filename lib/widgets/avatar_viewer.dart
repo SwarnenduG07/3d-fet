@@ -45,15 +45,26 @@ class _AvatarViewerState extends State<AvatarViewer> {
       contain: layout style paint;
       --poster-color: transparent;
       outline: none;
-      cursor: default;
-      pointer-events: none;
     }
   ''';
 
   String get _relatedJs {
     return '''
       const mv = document.querySelector('#avatar');
+      const applyDynamicCenter = () => {
+        try {
+          mv.cameraTarget = 'auto auto auto';
+          if (!mv.hasAttribute('camera-orbit') || mv.getAttribute('camera-orbit')?.includes('auto')) {
+            mv.cameraOrbit = '0deg 80deg auto';
+          }
+          if (typeof mv.jumpCameraToGoal === 'function') {
+            mv.jumpCameraToGoal();
+          }
+        } catch (_) {}
+      };
+
       mv.addEventListener('load', () => {
+        applyDynamicCenter();
         if (window.FlutterBridge) FlutterBridge.postMessage('model-loaded');
       });
     ''';
@@ -68,14 +79,14 @@ class _AvatarViewerState extends State<AvatarViewer> {
           src: widget.modelAsset,
           alt: 'GrowMe Avatar',
           autoRotate: widget.autoRotate,
-          cameraControls: false,
-          disablePan: true,
+          cameraControls: true,
+          disablePan: false,
           disableZoom: false,
           cameraOrbit: widget.cameraOrbit ?? '0deg 85deg 105%',
           cameraTarget: widget.cameraTarget ?? 'auto auto auto',
           fieldOfView: widget.fieldOfView ?? '45deg',
-          minCameraOrbit: 'auto auto 80%',
-          maxCameraOrbit: 'auto auto 150%',
+          minCameraOrbit: 'auto auto 70%',
+          maxCameraOrbit: 'auto auto 260%',
           backgroundColor: widget.backgroundColor,
           autoPlay: false,
           loading: Loading.eager,
@@ -87,7 +98,7 @@ class _AvatarViewerState extends State<AvatarViewer> {
           interactionPrompt: widget.interactionPrompt
               ? InteractionPrompt.auto
               : InteractionPrompt.none,
-          touchAction: TouchAction.none,
+          touchAction: TouchAction.panY,
           relatedCss: _relatedCss,
           relatedJs: _relatedJs,
           javascriptChannels: {

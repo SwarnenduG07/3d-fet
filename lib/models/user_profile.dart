@@ -109,37 +109,32 @@ class UserProfile {
 
   String get homeCameraOrbit {
     if (gender == Gender.male) {
-      return '0deg 84deg 108%';
+      return '0deg 84deg 220%';
     }
-    return '45deg 84deg 108%';
+    return '45deg 84deg 220%';
   }
 
   String get homeCameraTarget {
-    if (gender == Gender.male) {
-      return '2.5m 3m 1.6m';
-    }
-    return '-0.77m 2.6m 1.1m';
+    return 'auto auto auto';
+  }
+
+  String get homeFieldOfView {
+    return '76deg';
   }
 
   String get mirrorCameraOrbit {
-    if (gender == Gender.male) {
-      return '0deg 80deg 122%';
-    }
-    return '0deg 80deg 122%';
+    return '0deg 80deg 215%';
   }
 
   String get mirrorCameraTarget {
-    if (gender == Gender.male) {
-      return '0m 0.45m 0.4m';
-    }
-    return '-0.07m 0.96m 0.45m';
+    return 'auto auto auto';
   }
 
   String get mirrorFieldOfView {
     if (gender == Gender.male) {
-      return '47deg';
+      return '72deg';
     }
-    return '47deg';
+    return '72deg';
   }
 
   String get goalTypeLabel {

@@ -64,59 +64,57 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
       onTap: widget.onDismiss,
       child: FadeTransition(
         opacity: _fadeAnimation,
-        child: SizedBox.expand(
-          child: ColoredBox(
-            color: Colors.black.withValues(alpha: 0.75),
-            child: Center(
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _pulseAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.arrow_upward_rounded,
-                        size: 72,
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.75),
+          child: Center(
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _pulseAnimation.value,
+                    child: child,
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.arrow_upward_rounded,
+                      size: 72,
+                      color: AppColors.xpGold,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'レベルアップ！',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
                         color: AppColors.xpGold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.orange.withValues(alpha: 0.6),
+                            blurRadius: 20,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'レベルアップ！',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.xpGold,
-                          shadows: [
-                            Shadow(
-                              color: Colors.orange.withValues(alpha: 0.6),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Lv.${widget.newLevel}',
+                      style: const TextStyle(
+                        fontSize: 56,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Lv.${widget.newLevel}',
-                        style: const TextStyle(
-                          fontSize: 56,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'タップして続ける',
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'タップして続ける',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
             ),
