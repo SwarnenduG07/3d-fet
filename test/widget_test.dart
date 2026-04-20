@@ -1,10 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:games/main.dart';
+import 'package:games/screens/setup/setup_screen.dart';
 
 void main() {
-  testWidgets('GrowMe app launches with setup screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: GrowMeApp()));
-    expect(find.text('Welcome to GrowMe!'), findsOneWidget);
+  testWidgets('Setup screen renders first step', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: SetupScreen(),
+        ),
+      ),
+    );
+
+    expect(find.text('GrowMeへようこそ！'), findsOneWidget);
+    expect(find.text('性別を選択してください'), findsOneWidget);
   });
 }

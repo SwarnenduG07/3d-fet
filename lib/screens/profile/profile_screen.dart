@@ -1,16 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_profile.dart';
 import '../auth/auth_gate.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  static const String _notificationsKey = 'notifications_enabled';
+  bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
+    });
+  }
+
+  Future<void> _setNotificationPreference(bool value) async {
+    setState(() => _notificationsEnabled = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_notificationsKey, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     if (profile == null) return const SizedBox.shrink();
 
@@ -40,7 +69,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () => _showEditDialog(profile),
                       icon: const Icon(Icons.edit, color: AppColors.secondary),
                     ),
                   ],
@@ -153,8 +182,8 @@ class ProfileScreen extends ConsumerWidget {
                 '設定',
                 [
                   _buildRow('プッシュ通知', '', trailing: Switch(
-                    value: true,
-                    onChanged: (v) {},
+                    value: _notificationsEnabled,
+                    onChanged: _setNotificationPreference,
                     activeTrackColor: AppColors.secondary,
                   )),
                   _buildRow('言語', '日本語'),
@@ -292,6 +321,13 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditDialog(UserProfile profile) {
+    showDialog(
+      context: context,
+      builder: (_) => _EditProfileDialog(profile: profile),
+    );
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -327,6 +363,154 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EditProfileDialog extends ConsumerStatefulWidget {
+  final UserProfile profile;
+
+  const _EditProfileDialog({required this.profile});
+
+  @override
+  ConsumerState<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
+  late final TextEditingController _heightController;
+  late final TextEditingController _weightController;
+  late final TextEditingController _targetWeightController;
+  late final TextEditingController _targetDaysController;
+  late GoalType _selectedGoalType;
+
+  @override
+  void initState() {
+    super.initState();
+    _heightController = TextEditingController(text: widget.profile.height.toStringAsFixed(0));
+    _weightController = TextEditingController(text: widget.profile.weight.toStringAsFixed(0));
+    _targetWeightController = TextEditingController(text: widget.profile.targetWeight.toStringAsFixed(0));
+    _targetDaysController = TextEditingController(text: widget.profile.targetDays.toString());
+    _selectedGoalType = widget.profile.goalType;
+  }
+
+  @override
+  void dispose() {
+    _heightController.dispose();
+    _weightController.dispose();
+    _targetWeightController.dispose();
+    _targetDaysController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final height = double.tryParse(_heightController.text.trim());
+    final weight = double.tryParse(_weightController.text.trim());
+    final targetWeight = double.tryParse(_targetWeightController.text.trim());
+    final targetDays = int.tryParse(_targetDaysController.text.trim());
+
+    if (height == null || weight == null || targetWeight == null || targetDays == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('数値を正しく入力してください。')),
+      );
+      return;
+    }
+
+    await ref.read(userProfileProvider.notifier).updateProfile(
+          height: height,
+          weight: weight,
+          targetWeight: targetWeight,
+          goalType: _selectedGoalType,
+          targetDays: targetDays,
+        );
+
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('プロフィールを更新しました')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      titlePadding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
+      contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 0),
+      actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      title: const Text(
+        'プロフィール編集',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _heightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '身長 (cm)',
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '現在の体重 (kg)',
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _targetWeightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '目標体重 (kg)',
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _targetDaysController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '目標期間 (日)',
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<GoalType>(
+              initialValue: _selectedGoalType,
+              decoration: const InputDecoration(
+                labelText: '目標タイプ',
+                isDense: true,
+              ),
+              items: const [
+                DropdownMenuItem(value: GoalType.muscleGain, child: Text('筋肉増強')),
+                DropdownMenuItem(value: GoalType.weightLoss, child: Text('減量')),
+                DropdownMenuItem(value: GoalType.maintenance, child: Text('維持')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _selectedGoalType = value);
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('キャンセル'),
+        ),
+        ElevatedButton(
+          onPressed: _save,
+          child: const Text('保存'),
+        ),
+      ],
     );
   }
 }

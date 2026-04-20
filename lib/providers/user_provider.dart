@@ -69,6 +69,34 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     }
   }
 
+  Future<void> updateProfile({
+    required double height,
+    required double weight,
+    required double targetWeight,
+    required GoalType goalType,
+    required int targetDays,
+  }) async {
+    if (state == null) return;
+
+    state = state!.copyWith(
+      height: height,
+      weight: weight,
+      targetWeight: targetWeight,
+      goalType: goalType,
+      targetDays: targetDays,
+    );
+
+    if (_uid != null) {
+      await _firestore.updateUserProfile(_uid!, {
+        'height': height,
+        'weight': weight,
+        'targetWeight': targetWeight,
+        'goalType': goalType.name,
+        'targetDays': targetDays,
+      });
+    }
+  }
+
   Future<void> addWorkoutRewards({
     required int minutes,
     required DateTime startTime,

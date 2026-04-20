@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../models/user_profile.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/avatar_viewer.dart';
 import '../../widgets/level_up_overlay.dart';
 import '../mirror/mirror_screen.dart';
-import '../auth/auth_gate.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -103,29 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           ],
                         ),
-                        GestureDetector(
-                          onTap: () => _showSettingsMenu(context, ref),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.settings,
-                              size: 20,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
+                        const SizedBox(width: 40, height: 40),
                         // Body stage — solid badge matching Lv style
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -281,161 +256,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showSettingsMenu(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              '設定',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(Icons.bug_report, color: AppColors.textSecondary),
-              title: const Text('デバッグテストパネル'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDebugDialog(context, ref);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.refresh, color: AppColors.accentOrange),
-              title: const Text('進捗をリセット'),
-              subtitle: const Text('レベル1から再スタート'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showResetConfirmation(context, ref);
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('ログアウト', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showLogoutConfirmation(context);
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
-            SizedBox(width: 8),
-            Text('ログアウト'),
-          ],
-        ),
-        content: const Text(
-          '本当にログアウトしますか？',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              if (!context.mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const AuthGate()),
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('ログアウト'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showResetConfirmation(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
-            SizedBox(width: 8),
-            Text('進捗をリセットしますか？'),
-          ],
-        ),
-        content: const Text(
-          'レベル、XP、プロテインが初期状態に戻ります。この操作は取り消せません。',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await ref.read(userProfileProvider.notifier).resetProfile();
-              if (!context.mounted) return;
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('進捗をリセットしました'),
-                  backgroundColor: AppColors.accent,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accentOrange,
-            ),
-            child: const Text('リセット'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDebugDialog(BuildContext context, WidgetRef ref) {
-    final profile = ref.read(userProfileProvider);
-    if (profile == null) return;
-    showDialog(
-      context: context,
-      builder: (ctx) => _DebugTestDialog(ref: ref, profile: profile),
-    );
-  }
-
   void _showExerciseDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -582,12 +402,13 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
     final startTime = _startTime!;
     final endTime = DateTime.now();
 
+    setState(() => _isExercising = false);
+
     await widget.ref.read(userProfileProvider.notifier).addWorkoutRewards(
           minutes: minutes,
           startTime: startTime,
           endTime: endTime,
         );
-    setState(() => _isExercising = false);
 
     final earnedXP = minutes * 10;
     final earnedProtein = minutes * 5;
@@ -848,167 +669,3 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
   }
 }
 
-class _DebugTestDialog extends StatefulWidget {
-  final WidgetRef ref;
-  final UserProfile profile;
-
-  const _DebugTestDialog({required this.ref, required this.profile});
-
-  @override
-  State<_DebugTestDialog> createState() => _DebugTestDialogState();
-}
-
-class _DebugTestDialogState extends State<_DebugTestDialog> {
-  late double _level;
-  late double _xp;
-  late double _protein;
-  late double _bodyStage;
-
-  @override
-  void initState() {
-    super.initState();
-    _level = widget.profile.currentLevel.toDouble();
-    _xp = widget.profile.currentXP.toDouble();
-    _protein = widget.profile.protein.toDouble();
-    _bodyStage = widget.profile.bodyStage.toDouble();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Row(
-        children: [
-          Icon(Icons.bug_report, color: AppColors.accentOrange),
-          SizedBox(width: 8),
-          Text('デバッグテストパネル'),
-        ],
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SliderRow(
-              label: 'レベル',
-              value: _level,
-              min: 1,
-              max: 50,
-              divisions: 49,
-              display: _level.round().toString(),
-              onChanged: (v) => setState(() => _level = v),
-            ),
-            _SliderRow(
-              label: 'XP',
-              value: _xp,
-              min: 0,
-              max: 150000,
-              divisions: 300,
-              display: _xp.round().toString(),
-              onChanged: (v) => setState(() => _xp = v),
-            ),
-            _SliderRow(
-              label: 'プロテイン',
-              value: _protein,
-              min: 0,
-              max: 50000,
-              divisions: 100,
-              display: _protein.round().toString(),
-              onChanged: (v) => setState(() => _protein = v),
-            ),
-            _SliderRow(
-              label: '体のステージ',
-              value: _bodyStage,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              display: '${_bodyStage.round()} - ${_stageLabel(_bodyStage.round())}',
-              onChanged: (v) => setState(() => _bodyStage = v),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.softBlue.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                '体の変化はレベル10、25、40、50で発生します\nミラー画面を閉じるとテスト値は自動で元に戻ります',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            await widget.ref.read(userProfileProvider.notifier).setTestValues(
-                  level: _level.round(),
-                  xp: _xp.round(),
-                  protein: _protein.round(),
-                  bodyStage: _bodyStage.round(),
-                );
-            if (!context.mounted) return;
-            Navigator.of(context).pop();
-          },
-          child: const Text('適用'),
-        ),
-      ],
-    );
-  }
-
-  String _stageLabel(int stage) {
-    return 'ステージ $stage';
-  }
-}
-
-class _SliderRow extends StatelessWidget {
-  final String label;
-  final double value;
-  final double min;
-  final double max;
-  final int divisions;
-  final String display;
-  final ValueChanged<double> onChanged;
-
-  const _SliderRow({
-    required this.label,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.divisions,
-    required this.display,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-              Text(display, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.secondary)),
-            ],
-          ),
-          Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-}

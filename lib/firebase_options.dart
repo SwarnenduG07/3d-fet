@@ -45,7 +45,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '967234012921',
     projectId: 'fitness-app-4ac9f',
     storageBucket: 'fitness-app-4ac9f.firebasestorage.app',
-    iosBundleId: 'fitness',
+    iosBundleId: 'com.example.games',
     iosClientId:
         '967234012921-bckp4vu9rhe7t8q6gapc2itn722vpbv4.apps.googleusercontent.com',
   );
