@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/firestore_provider.dart';
 import '../../models/workout_record.dart';
@@ -15,6 +16,8 @@ class HistoryScreen extends ConsumerStatefulWidget {
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   List<WorkoutRecord> _workouts = [];
   bool _loading = true;
+
+  AppLocalizations get l10n => AppLocalizations.of(context);
 
   @override
   void initState() {
@@ -76,17 +79,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('履歴を削除'),
-        content: const Text('この履歴を削除しますか？'),
+        title: Text(l10n.deleteHistoryTitle),
+        content: Text(l10n.deleteHistoryMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('削除'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -102,17 +105,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('全履歴を削除'),
-        content: const Text('すべての履歴を削除しますか？この操作は取り消せません。'),
+        title: Text(l10n.deleteAllHistoryTitle),
+        content: Text(l10n.deleteAllHistoryMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('全削除'),
+            child: Text(l10n.deleteAll),
           ),
         ],
       ),
@@ -124,7 +127,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     // Calculate monthly stats
     final now = DateTime.now();
     final thisMonth = _workouts.where((w) =>
@@ -148,9 +150,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       onPressed: () => Navigator.of(context).maybePop(),
                       icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
-                  const Text(
-                    'ワークアウト履歴',
-                    style: TextStyle(
+                  Text(
+                    l10n.workoutHistoryTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -164,10 +166,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         _confirmDeleteAll();
                       }
                     },
-                    itemBuilder: (context) => const [
+                    itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'delete_all',
-                        child: Text('履歴を全削除'),
+                        child: Text(l10n.deleteAllHistoryTitle),
                       ),
                     ],
                   ),
@@ -193,9 +195,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '今月のまとめ',
-                    style: TextStyle(
+                  Text(
+                    l10n.thisMonthSummary,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -208,8 +210,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       _buildStat(
                         Icons.local_fire_department,
                         AppColors.accentOrange,
-                        '合計回数',
-                        '$totalCount回',
+                        l10n.totalCountLabel,
+                        '$totalCount${l10n.timesUnit}',
                       ),
                       Container(
                         width: 1,
@@ -219,8 +221,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       _buildStat(
                         Icons.timer,
                         AppColors.secondary,
-                        '合計時間',
-                        '$totalMinutes分',
+                        l10n.totalTimeLabel,
+                        '$totalMinutes${l10n.minutesUnit}',
                       ),
                       Container(
                         width: 1,
@@ -230,7 +232,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       _buildStat(
                         Icons.bolt,
                         AppColors.xpGold,
-                        '今月XP',
+                        l10n.monthXpLabel,
                         '$totalXP',
                       ),
                     ],
@@ -314,9 +316,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'エクササイズ',
-                        style: TextStyle(
+                      Text(
+                        l10n.exerciseLabel,
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -324,7 +326,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatDate(workout.startTime),
+                        _formatDate(workout.startTime, l10n),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -338,7 +340,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '${workout.duration}分',
+                      '${workout.duration}${l10n.minutesUnit}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -355,7 +357,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       ),
                     ),
                     Text(
-                      '+${workout.earnedProtein} プロテイン',
+                      '+${workout.earnedProtein} ${l10n.protein}',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -390,19 +392,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'まだワークアウトがありません',
-            style: TextStyle(
+          Text(
+            l10n.noWorkoutsYet,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'エクササイズを始めて、\nアバターを成長させましょう！',
+          Text(
+            l10n.startToGrowAvatar,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
             ),
@@ -437,16 +439,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
     if (diff.inDays == 0) {
-      return '今日 ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+      return '${l10n.today} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays == 1) {
-      return '昨日 ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+      return '${l10n.yesterday} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     } else {
-      return '${date.year}年${date.month}月${date.day}日 ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+      return l10n.isEnglish
+          ? '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')} ${date.hour}:${date.minute.toString().padLeft(2, '0')}'
+          : '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     }
   }
 }

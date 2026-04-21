@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../l10n/app_localizations.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/avatar_viewer.dart';
@@ -21,6 +23,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (profile == null) return const SizedBox.shrink();
 
     final levelUpEvent = ref.watch(levelUpEventProvider);
+    final l10n = AppLocalizations.of(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -47,206 +50,199 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Column(
                   children: [
-                  // Top stats bar
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            if (Navigator.of(context).canPop())
-                              IconButton(
-                                onPressed: () => Navigator.of(context).maybePop(),
-                                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                              ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.secondary,
-                                    AppColors.secondary.withValues(alpha: 0.8),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              if (Navigator.of(context).canPop())
+                                IconButton(
+                                  onPressed: () => Navigator.of(context).maybePop(),
+                                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                                ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.secondary,
+                                      AppColors.secondary.withValues(alpha: 0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.secondary.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        AppColors.secondary.withValues(alpha: 0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.star,
-                                      color: Colors.white, size: 18),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Lv.${profile.currentLevel}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.star, color: Colors.white, size: 18),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Lv.${profile.currentLevel}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 40, height: 40),
-                        // Body stage — solid badge matching Lv style
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                            ],
                           ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.accent,
-                                Color(0xFF6BBF3C),
+                          const SizedBox(width: 40, height: 40),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [AppColors.accent, Color(0xFF6BBF3C)],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accent.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.accent.withValues(alpha: 0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                            child: Text(
+                              l10n.bodyStageLabel(profile.bodyStage),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            profile.bodyStageLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // XP and Protein stats
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _StatCard(
-                            icon: Icons.bolt,
-                            iconColor: AppColors.xpGold,
-                            label: 'XP',
-                            value: '${profile.currentXP}',
-                            subValue: '/ ${profile.xpForNextLevel}',
-                            progress: profile.levelProgress,
-                            progressColor: AppColors.xpGold,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            icon: Icons.local_dining,
-                            iconColor: AppColors.proteinGreen,
-                            label: 'プロテイン',
-                            value: '${profile.protein}',
-                            subValue: '',
-                            progress: null,
-                            progressColor: AppColors.proteinGreen,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // 3D Avatar - full body, auto-centered
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: AvatarViewer(
-                        key: ValueKey(profile.homeModelPath),
-                        modelAsset: profile.homeModelPath,
-                        cameraOrbit: profile.homeCameraOrbit,
-                        cameraTarget: profile.homeCameraTarget,
-                        fieldOfView: profile.homeFieldOfView,
-                        backgroundColor: Colors.transparent,
-                        interactionPrompt: false,
-                        enableIdleAnimation: false,
+                        ],
                       ),
                     ),
-                  ),
-
-                  // Action buttons
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.secondary.withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              icon: Icons.bolt,
+                              iconColor: AppColors.xpGold,
+                              label: l10n.xp,
+                              value: '${profile.currentXP}',
+                              subValue: '/ ${profile.xpForNextLevel}',
+                              progress: profile.levelProgress,
+                              progressColor: AppColors.xpGold,
+                            ),
                           ),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _showExerciseDialog(context, ref),
-                            style: ElevatedButton.styleFrom(
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatCard(
+                              icon: Icons.local_dining,
+                              iconColor: AppColors.proteinGreen,
+                              label: l10n.protein,
+                              value: '${profile.protein}',
+                              subValue: '',
+                              progress: null,
+                              progressColor: AppColors.proteinGreen,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: AvatarViewer(
+                          key: ValueKey(profile.homeModelPath),
+                          modelAsset: profile.homeModelPath,
+                          cameraOrbit: profile.homeCameraOrbit,
+                          cameraTarget: profile.homeCameraTarget,
+                          fieldOfView: profile.homeFieldOfView,
+                          backgroundColor: Colors.transparent,
+                          interactionPrompt: false,
+                          enableIdleAnimation: false,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.secondary.withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showExerciseDialog(context, ref),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 0,
+                              ),
+                              icon: const Icon(Icons.play_arrow_rounded, size: 24),
+                              label: Text(
+                                l10n.startTraining,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const MirrorScreen()),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              elevation: 0,
+                              side: const BorderSide(color: AppColors.secondary, width: 2),
+                              backgroundColor: Colors.white.withValues(alpha: 0.9),
                             ),
-                            icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                            label: const Text('トレーニング開始', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const MirrorScreen(),
+                            icon: const Icon(Icons.person_search, size: 20),
+                            label: Text(
+                              l10n.viewMirror,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
                             ),
-                            side: const BorderSide(color: AppColors.secondary, width: 2),
-                            backgroundColor: Colors.white.withValues(alpha: 0.9),
                           ),
-                          icon: const Icon(Icons.person_search, size: 20),
-                          label: const Text('鏡を見る', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-
-              // Level-up overlay
+                  ],
+                ),
                 if (levelUpEvent != null)
                   LevelUpOverlay(
                     newLevel: levelUpEvent,
-                    onDismiss: () {
-                      ref.read(levelUpEventProvider.notifier).clear();
-                    },
+                    onDismiss: () => ref.read(levelUpEventProvider.notifier).clear(),
                   ),
               ],
             ),
@@ -260,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => _ExerciseDialog(ref: ref),
+      builder: (_) => _ExerciseDialog(ref: ref),
     );
   }
 }
@@ -398,6 +394,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
   }
 
   Future<void> _endExercise() async {
+    final l10n = AppLocalizations.of(context);
     final minutes = (_elapsedSeconds / 60).ceil().clamp(1, 999);
     final startTime = _startTime!;
     final endTime = DateTime.now();
@@ -431,7 +428,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               child: const Icon(Icons.celebration, color: AppColors.accentOrange, size: 24),
             ),
             const SizedBox(width: 12),
-            const Text('トレーニング完了！', style: TextStyle(fontSize: 20)),
+            Text(l10n.trainingCompleteTitle, style: const TextStyle(fontSize: 20)),
           ],
         ),
         content: Column(
@@ -451,7 +448,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                       const Icon(Icons.timer, color: AppColors.secondary, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        '$minutes 分',
+                        '$minutes ${l10n.minutesUnit}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -476,20 +473,16 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                               fontSize: 20,
                             ),
                           ),
-                          const Text(
-                            'XP',
-                            style: TextStyle(
+                          Text(
+                            l10n.xp,
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
-                      Container(
-                        width: 1,
-                        height: 40,
-                        color: AppColors.divider,
-                      ),
+                      Container(width: 1, height: 40, color: AppColors.divider),
                       Column(
                         children: [
                           const Icon(Icons.local_dining, color: AppColors.proteinGreen, size: 24),
@@ -502,9 +495,9 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                               fontSize: 20,
                             ),
                           ),
-                          const Text(
-                            'プロテイン',
-                            style: TextStyle(
+                          Text(
+                            l10n.protein,
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
@@ -528,11 +521,12 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('素晴らしい！', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text(
+                l10n.greatJob,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -548,16 +542,14 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       contentPadding: const EdgeInsets.all(24),
       title: Text(
-        _isExercising ? 'トレーニング中...' : 'トレーニング準備完了',
+        _isExercising ? l10n.trainingInProgressTitle : l10n.trainingReadyTitle,
         textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -586,12 +578,9 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              '頑張って！1秒1秒が大切です。',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 15,
-              ),
+            Text(
+              l10n.trainingInProgressMessage,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
               textAlign: TextAlign.center,
             ),
           ] else ...[
@@ -608,13 +597,10 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'トレーニングを開始したらスタートをタップしてください。XPとプロテインを獲得できます！',
+            Text(
+              l10n.trainingReadyMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 15,
-              ),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
             ),
           ],
         ],
@@ -629,7 +615,7 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('キャンセル', style: TextStyle(fontSize: 16)),
+                  child: Text(l10n.cancel, style: const TextStyle(fontSize: 16)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -643,7 +629,10 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('スタート', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    l10n.start,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -660,7 +649,10 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('トレーニング終了', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text(
+                l10n.finishTraining,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -668,4 +660,3 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
     );
   }
 }
-

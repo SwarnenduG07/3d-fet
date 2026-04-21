@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 class LevelUpOverlay extends StatefulWidget {
@@ -60,6 +61,7 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: widget.onDismiss,
       child: FadeTransition(
@@ -87,7 +89,7 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'レベルアップ！',
+                      l10n.levelUp,
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w900,
@@ -110,9 +112,9 @@ class _LevelUpOverlayState extends State<LevelUpOverlay>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'タップして続ける',
-                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    Text(
+                      l10n.tapToContinue,
+                      style: const TextStyle(color: Colors.white54, fontSize: 14),
                     ),
                   ],
                 ),

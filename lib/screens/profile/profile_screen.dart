@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
+import '../../providers/app_language_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_profile.dart';
 import '../auth/auth_gate.dart';
@@ -15,33 +17,27 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  static const String _notificationsKey = 'notifications_enabled';
-  bool _notificationsEnabled = true;
-
   @override
   void initState() {
     super.initState();
-    _loadNotificationPreference();
+    // Keep legacy key migration so old installs preserve their selection.
+    Future.microtask(_migrateLegacyLanguagePreference);
   }
 
-  Future<void> _loadNotificationPreference() async {
+  Future<void> _migrateLegacyLanguagePreference() async {
     final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    setState(() {
-      _notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
-    });
-  }
-
-  Future<void> _setNotificationPreference(bool value) async {
-    setState(() => _notificationsEnabled = value);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_notificationsKey, value);
+    final legacy = prefs.getString('app_language');
+    if (legacy == null) return;
+    final code = legacy == 'English' ? 'en' : 'ja';
+    await ref.read(appLanguageProvider.notifier).setLanguage(code);
+    await prefs.remove('app_language');
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     if (profile == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -60,8 +56,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.arrow_back_ios_new_rounded),
                       ),
-                    const Text(
-                      'プロフィール',
+                    Text(
+                      l10n.profileTitle,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -113,8 +109,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'ユーザー',
+                              Text(
+                                l10n.userLabel,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -149,11 +145,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStat('累計XP', '${profile.totalXP}', AppColors.xpGold),
+                        _buildStat(l10n.totalXpLabel, '${profile.totalXP}', AppColors.xpGold),
                         Container(width: 1, height: 40, color: AppColors.divider),
-                        _buildStat('レベル', '${profile.currentLevel}', AppColors.secondary),
+                        _buildStat(l10n.level, '${profile.currentLevel}', AppColors.secondary),
                         Container(width: 1, height: 40, color: AppColors.divider),
-                        _buildStat('ステージ', profile.bodyStageLabel, AppColors.accent),
+                        _buildStat(l10n.stage, l10n.bodyStageLabel(profile.bodyStage), AppColors.accent),
                       ],
                     ),
                   ],
@@ -164,14 +160,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // Body Info Section
               _buildSection(
-                '体の情報',
+                l10n.bodyInfoTitle,
                 [
-                  _buildRow('性別', profile.gender == Gender.male ? '男性' : '女性'),
-                  _buildRow('身長', '${profile.height.toInt()} cm'),
-                  _buildRow('現在の体重', '${profile.weight.toInt()} kg'),
-                  _buildRow('目標体重', '${profile.targetWeight.toInt()} kg'),
-                  _buildRow('目標タイプ', profile.goalTypeLabel),
-                  _buildRow('目標期間', '${profile.targetDays}日間'),
+                  _buildRow(l10n.genderLabel, profile.gender == Gender.male ? l10n.male : l10n.female),
+                  _buildRow(l10n.heightLabel, '${profile.height.toInt()} cm'),
+                  _buildRow(l10n.currentWeightLabel, '${profile.weight.toInt()} kg'),
+                  _buildRow(l10n.targetWeightLabel, '${profile.targetWeight.toInt()} kg'),
+                  _buildRow(l10n.goalTypeLabel, _goalTypeLabel(profile.goalType, l10n)),
+                  _buildRow(l10n.targetPeriodLabel, '${profile.targetDays} ${l10n.daysUnit}'),
                 ],
               ),
 
@@ -179,17 +175,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // Settings Section
               _buildSection(
-                '設定',
+                l10n.settingsTitle,
                 [
-                  _buildRow('プッシュ通知', '', trailing: Switch(
-                    value: _notificationsEnabled,
-                    onChanged: _setNotificationPreference,
+                  _buildRow(l10n.pushNotifications, '', trailing: Switch(
+                    value: profile.notificationsEnabled,
+                    onChanged: (value) {
+                      ref.read(userProfileProvider.notifier).setNotificationsEnabled(value);
+                    },
                     activeTrackColor: AppColors.secondary,
                   )),
-                  _buildRow('言語', '日本語'),
-                  _buildRow('プライバシーポリシー', ''),
-                  _buildRow('利用規約', ''),
-                  _buildRow('アプリバージョン', '1.0.0', showChevron: false),
+                  _buildRow(
+                    l10n.language,
+                    l10n.isEnglish ? l10n.english : l10n.japanese,
+                    onTap: _showLanguageDialog,
+                  ),
+                  _buildRow(
+                    l10n.privacyPolicy,
+                    '',
+                    onTap: () => _showInfoDialog(
+                      title: l10n.privacyPolicy,
+                      content: l10n.isEnglish
+                          ? 'This app stores profile, workout, and progress data to provide core features.\n\n'
+                              'Saved data is used only for app functionality such as history, growth calculations, and notifications.\n\n'
+                              'You can change usage state by logging out or reconfiguring app settings.'
+                          : '当アプリは、ユーザー体験向上のためにプロフィール情報・ワークアウト記録・進捗情報を保存します。\n\n'
+                              '保存されたデータはアプリ機能（履歴表示・成長計算・通知表示）のみに利用され、無断で第三者へ販売することはありません。\n\n'
+                              '必要に応じて、ログアウトやアプリ再設定によりデータ利用状態を変更できます。',
+                    ),
+                  ),
+                  _buildRow(
+                    l10n.termsOfUse,
+                    '',
+                    onTap: () => _showInfoDialog(
+                      title: l10n.termsOfUse,
+                      content: l10n.isEnglish
+                          ? 'This app is intended to support fitness and health tracking.\n\n'
+                              'Displayed training results and level data are informational and not medical advice.\n\n'
+                              'Please use the app safely according to your physical condition and device/network environment.'
+                          : '本アプリは健康管理サポートを目的としたサービスです。\n\n'
+                              '表示されるトレーニング結果・レベル情報は目安であり、医療行為を代替するものではありません。\n\n'
+                              'ユーザーは自身の体調に応じて安全に利用し、端末・ネットワーク環境に応じた操作を行ってください。',
+                    ),
+                  ),
+                  _buildRow(l10n.appVersion, '1.0.0', showChevron: false),
                 ],
               ),
 
@@ -209,8 +237,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
                   icon: const Icon(Icons.logout),
-                  label: const Text(
-                    'ログアウト',
+                  label: Text(
+                    l10n.logout,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -284,8 +312,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildRow(String label, String value, {Widget? trailing, bool showChevron = true}) {
-    return Container(
+  Widget _buildRow(
+    String label,
+    String value, {
+    Widget? trailing,
+    bool showChevron = true,
+    VoidCallback? onTap,
+  }) {
+    final rowChild = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: const BoxDecoration(
         border: Border(
@@ -319,6 +353,78 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
     );
+
+    if (onTap == null) return rowChild;
+    return InkWell(onTap: onTap, child: rowChild);
+  }
+
+  Future<void> _showLanguageDialog() async {
+    final currentCode = ref.read(appLanguageProvider);
+    final l10n = AppLocalizations.of(context);
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Text(
+              l10n.selectLanguage,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              title: Text(l10n.japanese),
+              trailing: currentCode == 'ja'
+                  ? const Icon(Icons.check, color: AppColors.secondary)
+                  : null,
+              onTap: () => Navigator.pop(ctx, 'ja'),
+            ),
+            ListTile(
+              title: Text(l10n.english),
+              trailing: currentCode == 'en'
+                  ? const Icon(Icons.check, color: AppColors.secondary)
+                  : null,
+              onTap: () => Navigator.pop(ctx, 'en'),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+
+    if (selected != null && selected != currentCode) {
+      await ref.read(appLanguageProvider.notifier).setLanguage(selected);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(selected == 'en' ? l10n.languageChangedToEnglish : l10n.languageChangedToJapanese)),
+      );
+    }
+  }
+
+  Future<void> _showInfoDialog({required String title, required String content}) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Text(
+            content,
+            style: const TextStyle(height: 1.45),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(AppLocalizations.of(context).close),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showEditDialog(UserProfile profile) {
@@ -329,25 +435,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
-            SizedBox(width: 8),
-            Text('ログアウト'),
+            const Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange),
+            const SizedBox(width: 8),
+            Text(l10n.logoutConfirmTitle),
           ],
         ),
-        content: const Text(
-          '本当にログアウトしますか？',
-          style: TextStyle(color: AppColors.textSecondary),
+        content: Text(
+          l10n.logoutConfirmMessage,
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('キャンセル'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -359,11 +466,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('ログアウト'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
     );
+  }
+
+  String _goalTypeLabel(GoalType goalType, AppLocalizations l10n) {
+    switch (goalType) {
+      case GoalType.muscleGain:
+        return l10n.goalTypeMuscleGain;
+      case GoalType.weightLoss:
+        return l10n.goalTypeWeightLoss;
+      case GoalType.maintenance:
+        return l10n.goalTypeMaintenance;
+    }
   }
 }
 
@@ -403,6 +521,7 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     final height = double.tryParse(_heightController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
     final targetWeight = double.tryParse(_targetWeightController.text.trim());
@@ -410,7 +529,7 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
 
     if (height == null || weight == null || targetWeight == null || targetDays == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('数値を正しく入力してください。')),
+        SnackBar(content: Text(l10n.invalidNumberInput)),
       );
       return;
     }
@@ -426,20 +545,21 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
     if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('プロフィールを更新しました')),
+      SnackBar(content: Text(l10n.profileUpdated)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       titlePadding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
       contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 0),
       actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-      title: const Text(
-        'プロフィール編集',
+      title: Text(
+        l10n.profileEditTitle,
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
       content: SingleChildScrollView(
@@ -449,8 +569,8 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
             TextField(
               controller: _heightController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '身長 (cm)',
+              decoration: InputDecoration(
+                labelText: '${l10n.heightLabel} (cm)',
                 isDense: true,
               ),
             ),
@@ -458,8 +578,8 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
             TextField(
               controller: _weightController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '現在の体重 (kg)',
+              decoration: InputDecoration(
+                labelText: '${l10n.currentWeightLabel} (kg)',
                 isDense: true,
               ),
             ),
@@ -467,8 +587,8 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
             TextField(
               controller: _targetWeightController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '目標体重 (kg)',
+              decoration: InputDecoration(
+                labelText: '${l10n.targetWeightLabel} (kg)',
                 isDense: true,
               ),
             ),
@@ -476,22 +596,22 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
             TextField(
               controller: _targetDaysController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '目標期間 (日)',
+              decoration: InputDecoration(
+                labelText: l10n.targetPeriodDaysLabel,
                 isDense: true,
               ),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<GoalType>(
               initialValue: _selectedGoalType,
-              decoration: const InputDecoration(
-                labelText: '目標タイプ',
+              decoration: InputDecoration(
+                labelText: l10n.goalTypeLabel,
                 isDense: true,
               ),
-              items: const [
-                DropdownMenuItem(value: GoalType.muscleGain, child: Text('筋肉増強')),
-                DropdownMenuItem(value: GoalType.weightLoss, child: Text('減量')),
-                DropdownMenuItem(value: GoalType.maintenance, child: Text('維持')),
+              items: [
+                DropdownMenuItem(value: GoalType.muscleGain, child: Text(l10n.goalTypeMuscleGain)),
+                DropdownMenuItem(value: GoalType.weightLoss, child: Text(l10n.goalTypeWeightLoss)),
+                DropdownMenuItem(value: GoalType.maintenance, child: Text(l10n.goalTypeMaintenance)),
               ],
               onChanged: (value) {
                 if (value == null) return;
@@ -504,11 +624,11 @@ class _EditProfileDialogState extends ConsumerState<_EditProfileDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('キャンセル'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: _save,
-          child: const Text('保存'),
+          child: Text(l10n.save),
         ),
       ],
     );

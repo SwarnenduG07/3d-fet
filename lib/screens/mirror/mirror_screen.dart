@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/avatar_viewer.dart';
@@ -61,6 +62,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     if (profile == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -90,9 +92,9 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                         icon: const Icon(Icons.arrow_back_ios_new,
                             color: Colors.white),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          '鏡',
+                          l10n.mirrorTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -163,8 +165,8 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                           children: [
                             Expanded(
                               child: _MirrorStat(
-                                label: 'ステージ',
-                                value: profile.bodyStageLabel,
+                                label: l10n.stage,
+                                value: l10n.bodyStageLabel(profile.bodyStage),
                               ),
                             ),
                             Container(
@@ -174,7 +176,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                             ),
                             Expanded(
                               child: _MirrorStat(
-                                label: 'レベル',
+                                label: l10n.level,
                                 value: 'Lv.${profile.currentLevel}',
                               ),
                             ),
@@ -185,7 +187,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                             ),
                             Expanded(
                               child: _MirrorStat(
-                                label: '総XP',
+                                label: l10n.totalXp,
                                 value: '${profile.totalXP}',
                               ),
                             ),
@@ -256,7 +258,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'ステージ $stage',
+                                '${l10n.stage} $stage',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: isActive
@@ -309,9 +311,9 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                               style: TextStyle(fontSize: 64),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
-                              '体の変化！',
-                              style: TextStyle(
+                            Text(
+                              l10n.bodyChangeTitle,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
@@ -332,7 +334,7 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                                 ),
                               ),
                               child: Text(
-                                '${profile.bodyStageLabel}に到達しました！',
+                                l10n.stageReachedMessage(l10n.bodyStageLabel(profile.bodyStage)),
                                 style: const TextStyle(
                                   color: AppColors.xpGold,
                                   fontSize: 20,
@@ -341,9 +343,9 @@ class _MirrorScreenState extends ConsumerState<MirrorScreen>
                               ),
                             ),
                             const SizedBox(height: 32),
-                            const Text(
-                              'タップして続ける',
-                              style: TextStyle(
+                            Text(
+                              l10n.tapToContinue,
+                              style: const TextStyle(
                                 color: Colors.white54,
                                 fontSize: 16,
                               ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/app_notification.dart';
 import '../models/user_profile.dart';
 import '../models/workout_record.dart';
 
@@ -71,6 +72,45 @@ class FirestoreService {
     final batch = _db.batch();
     for (final doc in snap.docs) {
       batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
+
+  CollectionReference<Map<String, dynamic>> get _notificationsCol =>
+      _db.collection('notifications');
+
+  Future<void> saveNotification(AppNotification notification) async {
+    await _notificationsCol.add(notification.toFirestore());
+  }
+
+  Stream<List<AppNotification>> watchNotifications(String uid, {int limit = 100}) {
+    final stream = _notificationsCol.where('userId', isEqualTo: uid).limit(limit).snapshots();
+    return stream.map((snap) {
+      final items = snap.docs
+          .map((doc) => AppNotification.fromFirestore(doc.data(), id: doc.id))
+          .toList();
+      items.sort((a, b) {
+        final aTime = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bTime = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bTime.compareTo(aTime);
+      });
+      return items;
+    });
+  }
+
+  Future<void> markAllNotificationsAsRead(String uid) async {
+    final snap = await _notificationsCol
+        .where('userId', isEqualTo: uid)
+        .where('isRead', isEqualTo: false)
+        .get();
+    if (snap.docs.isEmpty) return;
+
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      batch.update(doc.reference, {
+        'isRead': true,
+        'readAt': FieldValue.serverTimestamp(),
+      });
     }
     await batch.commit();
   }

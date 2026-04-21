@@ -17,6 +17,7 @@ class UserProfile {
   final int protein;
   final int bodyStage;
   final bool bodyChangeFlag;
+  final bool notificationsEnabled;
 
   const UserProfile({
     required this.gender,
@@ -31,6 +32,7 @@ class UserProfile {
     this.protein = 0,
     this.bodyStage = 1,
     this.bodyChangeFlag = false,
+    this.notificationsEnabled = true,
   });
 
   UserProfile copyWith({
@@ -46,6 +48,7 @@ class UserProfile {
     int? protein,
     int? bodyStage,
     bool? bodyChangeFlag,
+    bool? notificationsEnabled,
   }) {
     return UserProfile(
       gender: gender ?? this.gender,
@@ -60,6 +63,7 @@ class UserProfile {
       protein: protein ?? this.protein,
       bodyStage: bodyStage ?? this.bodyStage,
       bodyChangeFlag: bodyChangeFlag ?? this.bodyChangeFlag,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
     );
   }
 
@@ -177,6 +181,7 @@ class UserProfile {
         'protein': protein,
         'bodyStage': bodyStage,
         'bodyChangeFlag': bodyChangeFlag,
+        'notificationsEnabled': notificationsEnabled,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLoginAt': FieldValue.serverTimestamp(),
       };
@@ -233,6 +238,7 @@ class UserProfile {
       protein: toInt(data['protein'], 0),
       bodyStage: toInt(data['bodyStage'], 1),
       bodyChangeFlag: toBool(data['bodyChangeFlag'], false),
+      notificationsEnabled: toBool(data['notificationsEnabled'], true),
     );
   }
 
@@ -243,5 +249,6 @@ class UserProfile {
         'protein': protein,
         'bodyStage': bodyStage,
         'bodyChangeFlag': bodyChangeFlag,
+        'notificationsEnabled': notificationsEnabled,
       };
 }

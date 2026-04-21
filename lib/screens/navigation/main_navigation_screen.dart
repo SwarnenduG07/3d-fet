@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../home/home_screen.dart';
 import '../history/history_screen.dart';
@@ -25,6 +26,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
@@ -44,10 +46,10 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_rounded, 'ホーム'),
-                _buildNavItem(1, Icons.history_rounded, '履歴'),
-                _buildNavItem(2, Icons.notifications_rounded, '通知'),
-                _buildNavItem(3, Icons.person_rounded, 'マイページ'),
+                _buildNavItem(0, Icons.home_rounded, l10n.homeTitle),
+                _buildNavItem(1, Icons.history_rounded, l10n.historyTitle),
+                _buildNavItem(2, Icons.notifications_rounded, l10n.notificationsTitle),
+                _buildNavItem(3, Icons.person_rounded, l10n.profileTitle),
               ],
             ),
           ),

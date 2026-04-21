@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'app_language_provider.dart';
+import '../models/app_notification.dart';
 import '../models/user_profile.dart';
 import '../models/workout_record.dart';
 import '../services/firestore_service.dart';
@@ -159,6 +161,43 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
       debugPrint('Saving workout: ${workout.duration} min, ${workout.earnedXP} XP');
       await _firestore.saveWorkout(workout);
       debugPrint('Workout saved successfully');
+
+      if (state!.notificationsEnabled) {
+        final isEnglish = ref.read(appLanguageProvider) == 'en';
+        await _firestore.saveNotification(
+          AppNotification(
+            userId: _uid!,
+            title: isEnglish ? 'Workout complete' : 'ワークアウト完了',
+            message: isEnglish
+                ? 'Training for $minutes min earned +$earnedXP XP / +$earnedProtein protein'
+                : '$minutes分のトレーニングで +$earnedXP XP / +$earnedProtein プロテイン',
+            type: 'workout',
+          ),
+        );
+
+        if (newLevel > previousLevel) {
+          await _firestore.saveNotification(
+            AppNotification(
+              userId: _uid!,
+              title: isEnglish ? 'Level up!' : 'レベルアップ！',
+              message: isEnglish
+                  ? 'You reached level $newLevel. Congratulations!'
+                  : 'レベル $newLevel に到達しました。おめでとうございます！',
+              type: 'level_up',
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    if (state == null) return;
+    state = state!.copyWith(notificationsEnabled: enabled);
+    if (_uid != null) {
+      await _firestore.updateUserProfile(_uid!, {
+        'notificationsEnabled': enabled,
+      });
     }
   }
 
